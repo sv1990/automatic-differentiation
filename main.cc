@@ -9,12 +9,20 @@ struct is_expr : std::false_type {};
 template <typename T>
 constexpr bool is_expr_v = is_expr<T>::value;
 
+template <typename T>
+struct is_constant : std::false_type {};
+
+template <typename T>
+constexpr bool is_constant_v = is_constant<T>::value;
+
 struct zero {
+  constexpr double value() const noexcept { return 0; }
   constexpr double operator()(double) const noexcept { return 0; }
   constexpr auto derive() const noexcept { return zero{}; }
 };
 
 struct unity {
+  constexpr double value() const noexcept { return 1; }
   constexpr double operator()(double) const noexcept { return 1; }
   constexpr auto derive() const noexcept { return zero{}; }
 };
@@ -25,14 +33,24 @@ struct is_expr<zero> : std::true_type {};
 template <>
 struct is_expr<unity> : std::true_type {};
 
+template <>
+struct is_constant<zero> : std::true_type {};
+
+template <>
+struct is_constant<unity> : std::true_type {};
+
 struct constant {
-  double value;
-  constexpr double operator()(double) const noexcept { return value; }
+  double _value;
+  constexpr double value() const noexcept { return _value; }
+  constexpr double operator()(double) const noexcept { return _value; }
   constexpr auto derive() const noexcept { return zero{}; }
 };
 
 template <>
 struct is_expr<constant> : std::true_type {};
+
+template <>
+struct is_constant<constant> : std::true_type {};
 
 template <char... cs>
 struct variable {
@@ -50,8 +68,17 @@ const variable<'x'> x;
 template <typename L, typename R>
 struct addition;
 
-template <typename L, typename R>
-addition<L, R> make_addition(L l, R r) noexcept;
+template <typename L, typename R,
+          std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
+constexpr addition<L, R> make_addition(L l, R r) noexcept {
+  return addition<L, R>(l, r);
+}
+
+template <typename L, typename R,
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+constexpr constant make_addition(L l, R r) noexcept {
+  return constant{l.value() + r.value()};
+}
 
 template <typename L, typename R>
 struct addition {
@@ -66,18 +93,13 @@ struct addition {
   }
 };
 
-template <typename L, typename R>
-addition<L, R> make_addition(L l, R r) noexcept {
-  return addition<L, R>(l, r);
-}
-
 template <typename L>
-L make_addition(L l, zero) noexcept {
+constexpr L make_addition(L l, zero) noexcept {
   return l;
 }
 
 template <typename R>
-R make_addition(zero, R r) noexcept {
+constexpr R make_addition(zero, R r) noexcept {
   return r;
 }
 
@@ -86,7 +108,7 @@ struct is_expr<addition<L, R>> : std::true_type {};
 
 template <typename L, typename R,
           std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
-auto operator+(L l, R r) noexcept {
+constexpr auto operator+(L l, R r) noexcept {
   return addition<L, R>{l, r};
 }
 
@@ -105,27 +127,33 @@ struct multiplication {
 };
 
 template <typename L, typename R>
-multiplication<L, R> make_multiplication(L l, R r) noexcept {
+constexpr multiplication<L, R> make_multiplication(L l, R r) noexcept {
   return multiplication<L, R>(l, r);
 }
 
+template <typename L, typename R,
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+constexpr constant make_multiplication(L l, R r) noexcept {
+  return constant{l.value() * r.value()};
+}
+
 template <typename L>
-zero make_multiplication(L, zero) noexcept {
+constexpr zero make_multiplication(L, zero) noexcept {
   return zero{};
 }
 
 template <typename R>
-zero make_multiplication(zero, R) noexcept {
+constexpr zero make_multiplication(zero, R) noexcept {
   return zero{};
 }
 
 template <typename L>
-L make_multiplication(L l, unity) noexcept {
+constexpr L make_multiplication(L l, unity) noexcept {
   return l;
 }
 
 template <typename R>
-R make_multiplication(unity, R r) noexcept {
+constexpr R make_multiplication(unity, R r) noexcept {
   return r;
 }
 
@@ -134,7 +162,7 @@ struct is_expr<multiplication<L, R>> : std::true_type {};
 
 template <typename L, typename R,
           std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
-auto operator*(L l, R r) noexcept {
+constexpr auto operator*(L l, R r) noexcept {
   return multiplication<L, R>{l, r};
 }
 
