@@ -55,8 +55,8 @@ addition<L, R> make_addition(L l, R r) noexcept;
 
 template <typename L, typename R>
 struct addition {
-  L lhs;
-  R rhs;
+  [[no_unique_address]] L lhs;
+  [[no_unique_address]] R rhs;
   constexpr addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
   constexpr double operator()(double x) const noexcept {
     return lhs(x) + rhs(x);
@@ -92,8 +92,8 @@ auto operator+(L l, R r) noexcept {
 
 template <typename L, typename R>
 struct multiplication {
-  L lhs;
-  R rhs;
+  [[no_unique_address]] L lhs;
+  [[no_unique_address]] R rhs;
   constexpr multiplication(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
   constexpr double operator()(double x) const noexcept {
     return lhs(x) * rhs(x);
