@@ -9,13 +9,26 @@ struct is_expr : std::false_type {};
 template <typename T>
 constexpr bool is_expr_v = is_expr<T>::value;
 
-// TODO: Add zero and unity as special structs to help with optimizations of 1*x
-// and x+0
+struct zero {
+  constexpr double operator()(double) const noexcept { return 0; }
+  constexpr auto derive() const noexcept { return zero{}; }
+};
+
+struct unity {
+  constexpr double operator()(double) const noexcept { return 1; }
+  constexpr auto derive() const noexcept { return zero{}; }
+};
+
+template <>
+struct is_expr<zero> : std::true_type {};
+
+template <>
+struct is_expr<unity> : std::true_type {};
 
 struct constant {
   double value;
   constexpr double operator()(double) const noexcept { return value; }
-  constexpr auto derive() const noexcept { return constant{0}; }
+  constexpr auto derive() const noexcept { return zero{}; }
 };
 
 template <>
@@ -24,7 +37,7 @@ struct is_expr<constant> : std::true_type {};
 template <char... cs>
 struct variable {
   constexpr double operator()(double x) const noexcept { return x; }
-  constexpr auto derive() const noexcept { return constant{1}; }
+  constexpr auto derive() const noexcept { return unity{}; }
 };
 
 template <char... cs>
@@ -58,6 +71,16 @@ addition<L, R> make_addition(L l, R r) noexcept {
   return addition<L, R>(l, r);
 }
 
+template <typename L>
+L make_addition(L l, zero) noexcept {
+  return l;
+}
+
+template <typename R>
+R make_addition(zero, R r) noexcept {
+  return r;
+}
+
 template <typename L, typename R>
 struct is_expr<addition<L, R>> : std::true_type {};
 
@@ -84,6 +107,26 @@ struct multiplication {
 template <typename L, typename R>
 multiplication<L, R> make_multiplication(L l, R r) noexcept {
   return multiplication<L, R>(l, r);
+}
+
+template <typename L>
+zero make_multiplication(L, zero) noexcept {
+  return zero{};
+}
+
+template <typename R>
+zero make_multiplication(zero, R) noexcept {
+  return zero{};
+}
+
+template <typename L>
+L make_multiplication(L l, unity) noexcept {
+  return l;
+}
+
+template <typename R>
+R make_multiplication(unity, R r) noexcept {
+  return r;
 }
 
 template <typename L, typename R>
@@ -119,6 +162,10 @@ int main() {
             << std::setw(colwidth) << std::right << "f(x)" << ' '  //
             << std::setw(colwidth) << std::right << "df(x)" << ' ' //
             << std::setw(colwidth) << std::right << "d2f(x)" << '\n';
+  std::cout << std::setw(colwidth) << std::right << "size" << ' '     //
+            << std::setw(colwidth) << std::right << sizeof(f) << ' '  //
+            << std::setw(colwidth) << std::right << sizeof(df) << ' ' //
+            << std::setw(colwidth) << std::right << sizeof(d2f) << '\n';
   for (double x = 0; x <= 10; x += 1) {
     std::cout << std::setw(colwidth) << std::right << x << ' '     //
               << std::setw(colwidth) << std::right << f(x) << ' '  //
