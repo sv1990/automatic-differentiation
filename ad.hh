@@ -19,14 +19,26 @@ constexpr bool is_constant_v = is_constant<T>::value;
 
 struct zero {
   constexpr double value() const noexcept { return 0; }
-  constexpr double operator()(double) const noexcept { return 0; }
-  constexpr auto derive() const noexcept { return zero{}; }
+  template <typename... Ts>
+  constexpr double operator()(Ts...) const noexcept {
+    return 0;
+  }
+  template <std::size_t = 0>
+  constexpr auto derive() const noexcept {
+    return zero{};
+  }
 };
 
 struct unity {
   constexpr double value() const noexcept { return 1; }
-  constexpr double operator()(double) const noexcept { return 1; }
-  constexpr auto derive() const noexcept { return zero{}; }
+  template <typename... Ts>
+  constexpr double operator()(Ts...) const noexcept {
+    return 1;
+  }
+  template <std::size_t = 0>
+  constexpr auto derive() const noexcept {
+    return zero{};
+  }
 };
 
 template <>
@@ -44,8 +56,14 @@ struct is_constant<unity> : std::true_type {};
 struct constant {
   double _value;
   constexpr double value() const noexcept { return _value; }
-  constexpr double operator()(double) const noexcept { return _value; }
-  constexpr auto derive() const noexcept { return zero{}; }
+  template <typename... Ts>
+  constexpr double operator()(Ts...) const noexcept {
+    return _value;
+  }
+  template <std::size_t = 0>
+  constexpr auto derive() const noexcept {
+    return zero{};
+  }
 };
 
 template <>
@@ -70,14 +88,36 @@ constexpr auto as_expr(T x) noexcept {
   }
 }
 
-template <char... cs>
+template <std::size_t I, typename T, typename... Ts>
+constexpr auto get([[maybe_unused]] T x, Ts... xs) noexcept {
+  if constexpr (I == 0) {
+    return x;
+  }
+  else {
+    return get<I - 1>(xs...);
+  }
+}
+
+template <std::size_t N>
 struct variable {
-  constexpr double operator()(double x) const noexcept { return x; }
-  constexpr auto derive() const noexcept { return unity{}; }
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return static_cast<double>(get<N>(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    if constexpr (I == N) {
+      return unity{};
+    }
+    else {
+      return zero{};
+    }
+  }
+  inline static constexpr std::size_t value = N;
 };
 
-template <char... cs>
-struct is_expr<variable<cs...>> : std::true_type {};
+template <std::size_t n>
+struct is_expr<variable<n>> : std::true_type {};
 
 template <typename L, typename R>
 struct addition;
@@ -99,11 +139,13 @@ struct addition {
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  constexpr double operator()(double x) const noexcept {
-    return lhs(x) + rhs(x);
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return lhs(xs...) + rhs(xs...);
   }
+  template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_addition(lhs.derive(), rhs.derive());
+    return make_addition(lhs.template derive<I>(), rhs.template derive<I>());
   }
 };
 
@@ -154,11 +196,13 @@ struct subtraction {
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr subtraction(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  constexpr double operator()(double x) const noexcept {
-    return lhs(x) - rhs(x);
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return lhs(xs...) - rhs(xs...);
   }
+  template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_subtraction(lhs.derive(), rhs.derive());
+    return make_subtraction(lhs.template derive<I>(), rhs.template derive<I>());
   }
 };
 
@@ -173,12 +217,14 @@ struct multiplication {
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr multiplication(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  constexpr double operator()(double x) const noexcept {
-    return lhs(x) * rhs(x);
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return lhs(xs...) * rhs(xs...);
   }
+  template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_addition(make_multiplication(lhs.derive(), rhs),
-                         make_multiplication(lhs, rhs.derive()));
+    return make_addition(make_multiplication(lhs.template derive<I>(), rhs),
+                         make_multiplication(lhs, rhs.template derive<I>()));
   }
 };
 
@@ -254,13 +300,15 @@ struct division {
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  constexpr double operator()(double x) const noexcept {
-    return lhs(x) / rhs(x);
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return lhs(xs...) / rhs(xs...);
   }
+  template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     return make_division(
-        make_subtraction(make_multiplication(lhs.derive(), rhs),
-                         make_multiplication(lhs, rhs.derive())),
+        make_subtraction(make_multiplication(lhs.template derive<I>(), rhs),
+                         make_multiplication(lhs, rhs.template derive<I>())),
         make_multiplication(rhs, rhs));
   }
 };
@@ -276,11 +324,20 @@ constexpr auto operator/(L l, R r) noexcept {
 using detail::constant;
 using detail::variable;
 
-namespace var {
-const variable<'x'> x;
-}
+inline namespace var {
+inline constexpr variable<0> _0;
+inline constexpr variable<1> _1;
+inline constexpr variable<2> _2;
+inline constexpr variable<3> _3;
+inline constexpr variable<4> _4;
+inline constexpr variable<5> _5;
+inline constexpr variable<6> _6;
+inline constexpr variable<7> _7;
+inline constexpr variable<8> _8;
+inline constexpr variable<9> _9;
+} // namespace var
 
-namespace literals {
+inline namespace literals {
 constexpr constant operator""_c(long double x) {
   return constant{static_cast<double>(x)};
 }
