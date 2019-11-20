@@ -4,6 +4,7 @@
 #include <type_traits>
 
 namespace ad {
+namespace detail {
 template <typename T>
 struct is_expr : std::false_type {};
 
@@ -61,10 +62,6 @@ struct variable {
 
 template <char... cs>
 struct is_expr<variable<cs...>> : std::true_type {};
-
-namespace var {
-const variable<'x'> x;
-}
 
 template <typename L, typename R>
 struct addition;
@@ -207,6 +204,14 @@ template <typename L, typename R,
           std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
   return make_multiplication(l, r);
+}
+} // namespace detail
+
+using detail::constant;
+using detail::variable;
+
+namespace var {
+const variable<'x'> x;
 }
 
 namespace literals {
