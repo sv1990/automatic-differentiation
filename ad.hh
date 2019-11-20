@@ -205,6 +205,56 @@ template <typename L, typename R,
 constexpr auto operator*(L l, R r) noexcept {
   return make_multiplication(l, r);
 }
+
+template <typename L, typename R>
+struct division;
+
+template <typename L, typename R>
+struct is_expr<division<L, R>> : std::true_type {};
+
+template <typename L, typename R>
+constexpr division<L, R> make_division(L l, R r) noexcept {
+  return division<L, R>(l, r);
+}
+
+template <typename L, typename R,
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+constexpr constant make_division(L l, R r) noexcept {
+  return constant{l.value() / r.value()};
+}
+
+template <typename R>
+constexpr zero make_division(zero, R) noexcept {
+  return zero{};
+}
+
+template <typename L>
+constexpr L make_division(L l, unity) noexcept {
+  return l;
+}
+
+template <typename L, typename R>
+struct division {
+  [[no_unique_address]] L lhs;
+  [[no_unique_address]] R rhs;
+  constexpr division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
+  constexpr double operator()(double x) const noexcept {
+    return lhs(x) / rhs(x);
+  }
+  constexpr auto derive() const noexcept {
+    return make_division(
+        make_subtraction(make_multiplication(lhs.derive(), rhs),
+                         make_multiplication(lhs, rhs.derive())),
+        make_multiplication(rhs, rhs));
+  }
+};
+
+template <typename L, typename R,
+          std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
+constexpr auto operator/(L l, R r) noexcept {
+  return make_division(l, r);
+}
+
 } // namespace detail
 
 using detail::constant;
