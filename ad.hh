@@ -17,7 +17,28 @@ struct is_constant : std::false_type {};
 template <typename T>
 constexpr bool is_constant_v = is_constant<T>::value;
 
-struct zero {
+template <std::size_t N>
+struct variable;
+
+template <typename T>
+struct is_variable : std::false_type {};
+
+template <std::size_t N>
+struct is_variable<variable<N>> : std::true_type {};
+
+template <typename T>
+inline constexpr bool is_variable_v = is_variable<T>::value;
+
+template <typename Derived>
+struct expression_base {
+  template <typename T, std::enable_if_t<is_variable_v<T>>* = nullptr>
+  constexpr auto derive(T) const noexcept {
+    return static_cast<const Derived&>(*this).template derive<T::value>();
+  }
+};
+
+struct zero : expression_base<zero> {
+  using expression_base<zero>::derive;
   constexpr double value() const noexcept { return 0; }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
@@ -29,7 +50,8 @@ struct zero {
   }
 };
 
-struct unity {
+struct unity : expression_base<unity> {
+  using expression_base<unity>::derive;
   constexpr double value() const noexcept { return 1; }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
@@ -100,7 +122,8 @@ constexpr auto get([[maybe_unused]] T x, Ts... xs) noexcept {
 }
 
 template <std::size_t N>
-struct variable {
+struct variable : expression_base<variable<N>> {
+  using expression_base<variable>::derive;
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return static_cast<double>(get<N>(xs...));
@@ -138,7 +161,8 @@ constexpr constant make_addition(L l, R r) noexcept {
 }
 
 template <typename L, typename R>
-struct addition {
+struct addition : expression_base<addition<L, R>> {
+  using expression_base<addition>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
@@ -195,7 +219,8 @@ constexpr L make_subtraction(L l, zero) noexcept {
 }
 
 template <typename L, typename R>
-struct subtraction {
+struct subtraction : expression_base<subtraction<L, R>> {
+  using expression_base<subtraction>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr subtraction(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
@@ -216,7 +241,8 @@ constexpr auto operator-(L l, R r) noexcept {
 }
 
 template <typename L, typename R>
-struct multiplication {
+struct multiplication : expression_base<multiplication<L, R>> {
+  using expression_base<multiplication>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr multiplication(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
@@ -299,7 +325,8 @@ constexpr L make_division(L l, unity) noexcept {
 }
 
 template <typename L, typename R>
-struct division {
+struct division : expression_base<division<L, R>> {
+  using expression_base<division>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}

@@ -9,8 +9,8 @@ int main() {
 
   const auto f = x * x * y;
 
-  const auto dxf = f.derive<0>();
-  const auto dyf = f.derive<1>();
+  const auto dxf = f.derive(x);
+  const auto dyf = f.derive(y);
 
   int colwidth = 3;
   for (double x = -5; x <= 5; x += 1) {
