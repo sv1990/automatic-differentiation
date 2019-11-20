@@ -75,8 +75,10 @@ struct is_constant<zero> : std::true_type {};
 template <>
 struct is_constant<unity> : std::true_type {};
 
-struct constant {
+struct constant : expression_base<constant> {
+  using expression_base<constant>::derive;
   double _value;
+  constexpr explicit constant(double value) noexcept : _value(value) {}
   constexpr double value() const noexcept { return _value; }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
