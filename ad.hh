@@ -90,6 +90,7 @@ constexpr auto as_expr(T x) noexcept {
 
 template <std::size_t I, typename T, typename... Ts>
 constexpr auto get([[maybe_unused]] T x, Ts... xs) noexcept {
+  static_assert(I < sizeof...(Ts) + 1, "Too few arguments passed!");
   if constexpr (I == 0) {
     return x;
   }
