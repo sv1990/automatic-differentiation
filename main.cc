@@ -7,7 +7,7 @@ int main() {
   using namespace ad::literals;
   using ad::var::x;
 
-  const auto f   = x * (x + 1_c);
+  const auto f   = (x + 1_c) * (x - 1_c);
   const auto df  = f.derive();
   const auto d2f = df.derive();
 

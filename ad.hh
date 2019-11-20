@@ -110,7 +110,49 @@ struct is_expr<addition<L, R>> : std::true_type {};
 template <typename L, typename R,
           std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
 constexpr auto operator+(L l, R r) noexcept {
-  return addition<L, R>{l, r};
+  return make_addition(l, r);
+}
+
+template <typename L, typename R>
+struct subtraction;
+
+template <typename L, typename R>
+struct is_expr<subtraction<L, R>> : std::true_type {};
+
+template <typename L, typename R,
+          std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
+constexpr subtraction<L, R> make_subtraction(L l, R r) noexcept {
+  return subtraction<L, R>(l, r);
+}
+
+template <typename L, typename R,
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+constexpr constant make_subtraction(L l, R r) noexcept {
+  return constant{l.value() - r.value()};
+}
+
+template <typename L>
+constexpr L make_subtraction(L l, zero) noexcept {
+  return l;
+}
+
+template <typename L, typename R>
+struct subtraction {
+  [[no_unique_address]] L lhs;
+  [[no_unique_address]] R rhs;
+  constexpr subtraction(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
+  constexpr double operator()(double x) const noexcept {
+    return lhs(x) - rhs(x);
+  }
+  constexpr auto derive() const noexcept {
+    return make_subtraction(lhs.derive(), rhs.derive());
+  }
+};
+
+template <typename L, typename R,
+          std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
+constexpr auto operator-(L l, R r) noexcept {
+  return make_subtraction(l, r);
 }
 
 template <typename L, typename R>
@@ -164,7 +206,7 @@ struct is_expr<multiplication<L, R>> : std::true_type {};
 template <typename L, typename R,
           std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
-  return multiplication<L, R>{l, r};
+  return make_multiplication(l, r);
 }
 
 namespace literals {
@@ -177,6 +219,5 @@ constexpr constant operator""_c(unsigned long long x) {
 
 } // namespace literals
 } // namespace ad
-
 
 #endif // AUTOMATICDIFFERENTIATION_AD_HH_1574234361739842350_
