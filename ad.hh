@@ -129,7 +129,9 @@ constexpr addition<L, R> make_addition(L l, R r) noexcept {
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
+                           (!std::is_same_v<L, zero> ||
+                            !std::is_same_v<R, zero>)>* = nullptr>
 constexpr constant make_addition(L l, R r) noexcept {
   return constant{l.value() + r.value()};
 }
@@ -149,7 +151,7 @@ struct addition {
   }
 };
 
-template <typename L>
+template <typename L, std::enable_if_t<!std::is_same_v<L, zero>>* = nullptr>
 constexpr L make_addition(L l, zero) noexcept {
   return l;
 }
