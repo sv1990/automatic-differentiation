@@ -5,7 +5,7 @@
 
 int main() {
   using namespace ad::literals;
-  using ad::var::x;
+  constexpr auto x = ad::_0;
 
   const auto f   = (x + 1) * (x - 1);
   const auto df  = f.derive();
