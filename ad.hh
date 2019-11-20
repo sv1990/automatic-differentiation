@@ -54,6 +54,22 @@ struct is_expr<constant> : std::true_type {};
 template <>
 struct is_constant<constant> : std::true_type {};
 
+template <typename...>
+inline constexpr bool dependent_false = false;
+
+template <typename T>
+constexpr auto as_expr(T x) noexcept {
+  if constexpr (is_expr_v<T>) {
+    return x;
+  }
+  else if constexpr (std::is_arithmetic_v<T>) {
+    return constant{static_cast<double>(x)};
+  }
+  else {
+    static_assert(dependent_false<T>, "ad expects arithmetic types!");
+  }
+}
+
 template <char... cs>
 struct variable {
   constexpr double operator()(double x) const noexcept { return x; }
@@ -105,9 +121,9 @@ template <typename L, typename R>
 struct is_expr<addition<L, R>> : std::true_type {};
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
 constexpr auto operator+(L l, R r) noexcept {
-  return make_addition(l, r);
+  return make_addition(as_expr(l), as_expr(r));
 }
 
 template <typename L, typename R>
@@ -147,9 +163,9 @@ struct subtraction {
 };
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
 constexpr auto operator-(L l, R r) noexcept {
-  return make_subtraction(l, r);
+  return make_subtraction(as_expr(l), as_expr(r));
 }
 
 template <typename L, typename R>
@@ -201,9 +217,9 @@ template <typename L, typename R>
 struct is_expr<multiplication<L, R>> : std::true_type {};
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
-  return make_multiplication(l, r);
+  return make_multiplication(as_expr(l), as_expr(r));
 }
 
 template <typename L, typename R>
@@ -250,9 +266,9 @@ struct division {
 };
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> && is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
 constexpr auto operator/(L l, R r) noexcept {
-  return make_division(l, r);
+  return make_division(as_expr(l), as_expr(r));
 }
 
 } // namespace detail
