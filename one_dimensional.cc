@@ -4,7 +4,6 @@
 #include <iostream>
 
 int main() {
-  using namespace ad::literals;
   constexpr auto x = ad::_0;
 
   const auto f   = (x + 1) * (x - 1);
