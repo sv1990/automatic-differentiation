@@ -7,14 +7,29 @@
 
 namespace ad {
 namespace detail {
+template <std::size_t N>
+struct variable;
+struct zero;
+struct unity;
+struct constant;
+template <typename L, typename R>
+struct addition;
+template <typename L, typename R>
+struct subtraction;
+template <typename L, typename R>
+struct multiplication;
+template <typename L, typename R>
+struct division;
+template <typename T>
+struct negation;
+template <typename T>
+struct exponential;
+
 template <typename T>
 struct is_constant : std::false_type {};
 
 template <typename T>
 constexpr bool is_constant_v = is_constant<T>::value;
-
-template <std::size_t N>
-struct variable;
 
 template <typename T>
 struct is_variable : std::false_type {};
@@ -134,9 +149,6 @@ struct variable : expression_base<variable<N>> {
   inline static constexpr std::size_t value = N;
 };
 
-template <typename L, typename R>
-struct addition;
-
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
 constexpr addition<L, R> make_addition(L l, R r) noexcept {
@@ -182,9 +194,6 @@ struct addition : expression_base<addition<L, R>> {
     return make_addition(lhs.template derive<I>(), rhs.template derive<I>());
   }
 };
-
-template <typename L, typename R>
-struct subtraction;
 
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
@@ -280,9 +289,6 @@ constexpr auto operator*(L l, R r) noexcept {
 }
 
 template <typename L, typename R>
-struct division;
-
-template <typename L, typename R>
 constexpr division<L, R> make_division(L l, R r) noexcept {
   return division<L, R>(l, r);
 }
@@ -334,9 +340,6 @@ constexpr auto operator+(T x) noexcept {
 }
 
 template <typename T>
-struct negation;
-
-template <typename T>
 constexpr auto make_negation(T x) noexcept {
   return negation<T>(x);
 }
@@ -365,9 +368,6 @@ template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
 constexpr auto operator-(T x) noexcept {
   return make_negation(x);
 }
-
-template <typename T>
-struct exponential;
 
 template <typename T>
 constexpr auto make_exponential(T x) noexcept {
