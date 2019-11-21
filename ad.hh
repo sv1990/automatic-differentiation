@@ -326,6 +326,44 @@ constexpr auto operator/(L l, R r) noexcept {
   return make_division(as_expr(l), as_expr(r));
 }
 
+template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+constexpr auto operator+(T x) noexcept {
+  return x;
+}
+
+template <typename T>
+struct negation;
+
+template <typename T>
+constexpr auto make_negation(T x) noexcept {
+  return negation<T>(x);
+}
+
+template <typename T>
+constexpr auto make_negation(negation<T> x) noexcept {
+  return x.arg;
+}
+
+template <typename T>
+struct negation : expression_base<negation<T>> {
+  using expression_base<negation>::derive;
+  [[no_unique_address]] T arg;
+  constexpr explicit negation(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return -arg(xs...);
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_negation(arg.template derive<I>());
+  }
+};
+
+template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+constexpr auto operator-(T x) noexcept {
+  return make_negation(x);
+}
+
 } // namespace detail
 
 using detail::constant;
