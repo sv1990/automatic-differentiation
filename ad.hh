@@ -150,6 +150,9 @@ struct is_expr<variable<n>> : std::true_type {};
 template <typename L, typename R>
 struct addition;
 
+template <typename L, typename R>
+struct is_expr<addition<L, R>> : std::true_type {};
+
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
 constexpr addition<L, R> make_addition(L l, R r) noexcept {
@@ -162,6 +165,22 @@ template <typename L, typename R,
                             !std::is_same_v<R, zero>)>* = nullptr>
 constexpr constant make_addition(L l, R r) noexcept {
   return constant{l.value() + r.value()};
+}
+
+template <typename L, std::enable_if_t<!std::is_same_v<L, zero>>* = nullptr>
+constexpr L make_addition(L l, zero) noexcept {
+  return l;
+}
+
+template <typename R>
+constexpr R make_addition(zero, R r) noexcept {
+  return r;
+}
+
+template <typename L, typename R,
+          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
+constexpr auto operator+(L l, R r) noexcept {
+  return make_addition(as_expr(l), as_expr(r));
 }
 
 template <typename L, typename R>
@@ -179,25 +198,6 @@ struct addition : expression_base<addition<L, R>> {
     return make_addition(lhs.template derive<I>(), rhs.template derive<I>());
   }
 };
-
-template <typename L, std::enable_if_t<!std::is_same_v<L, zero>>* = nullptr>
-constexpr L make_addition(L l, zero) noexcept {
-  return l;
-}
-
-template <typename R>
-constexpr R make_addition(zero, R r) noexcept {
-  return r;
-}
-
-template <typename L, typename R>
-struct is_expr<addition<L, R>> : std::true_type {};
-
-template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
-constexpr auto operator+(L l, R r) noexcept {
-  return make_addition(as_expr(l), as_expr(r));
-}
 
 template <typename L, typename R>
 struct subtraction;
@@ -222,6 +222,12 @@ constexpr L make_subtraction(L l, zero) noexcept {
   return l;
 }
 
+template <typename L, typename R,
+          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
+constexpr auto operator-(L l, R r) noexcept {
+  return make_subtraction(as_expr(l), as_expr(r));
+}
+
 template <typename L, typename R>
 struct subtraction : expression_base<subtraction<L, R>> {
   using expression_base<subtraction>::derive;
@@ -237,12 +243,6 @@ struct subtraction : expression_base<subtraction<L, R>> {
     return make_subtraction(lhs.template derive<I>(), rhs.template derive<I>());
   }
 };
-
-template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
-constexpr auto operator-(L l, R r) noexcept {
-  return make_subtraction(as_expr(l), as_expr(r));
-}
 
 template <typename L, typename R>
 struct multiplication : expression_base<multiplication<L, R>> {
