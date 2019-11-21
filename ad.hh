@@ -6,12 +6,6 @@
 namespace ad {
 namespace detail {
 template <typename T>
-struct is_expr : std::false_type {};
-
-template <typename T>
-constexpr bool is_expr_v = is_expr<T>::value;
-
-template <typename T>
 struct is_constant : std::false_type {};
 
 template <typename T>
@@ -36,6 +30,9 @@ struct expression_base {
     return static_cast<const Derived&>(*this).template derive<T::value>();
   }
 };
+
+template <typename T>
+constexpr bool is_expr_v = std::is_base_of_v<expression_base<T>, T>;
 
 struct zero : expression_base<zero> {
   using expression_base<zero>::derive;
@@ -64,12 +61,6 @@ struct unity : expression_base<unity> {
 };
 
 template <>
-struct is_expr<zero> : std::true_type {};
-
-template <>
-struct is_expr<unity> : std::true_type {};
-
-template <>
 struct is_constant<zero> : std::true_type {};
 
 template <>
@@ -89,9 +80,6 @@ struct constant : expression_base<constant> {
     return zero{};
   }
 };
-
-template <>
-struct is_expr<constant> : std::true_type {};
 
 template <>
 struct is_constant<constant> : std::true_type {};
@@ -144,14 +132,8 @@ struct variable : expression_base<variable<N>> {
   inline static constexpr std::size_t value = N;
 };
 
-template <std::size_t n>
-struct is_expr<variable<n>> : std::true_type {};
-
 template <typename L, typename R>
 struct addition;
-
-template <typename L, typename R>
-struct is_expr<addition<L, R>> : std::true_type {};
 
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
@@ -201,9 +183,6 @@ struct addition : expression_base<addition<L, R>> {
 
 template <typename L, typename R>
 struct subtraction;
-
-template <typename L, typename R>
-struct is_expr<subtraction<L, R>> : std::true_type {};
 
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
@@ -292,9 +271,6 @@ constexpr R make_multiplication(unity, R r) noexcept {
   return r;
 }
 
-template <typename L, typename R>
-struct is_expr<multiplication<L, R>> : std::true_type {};
-
 template <typename L, typename R,
           std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
@@ -303,9 +279,6 @@ constexpr auto operator*(L l, R r) noexcept {
 
 template <typename L, typename R>
 struct division;
-
-template <typename L, typename R>
-struct is_expr<division<L, R>> : std::true_type {};
 
 template <typename L, typename R>
 constexpr division<L, R> make_division(L l, R r) noexcept {
