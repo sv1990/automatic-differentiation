@@ -28,6 +28,8 @@ template <typename T>
 struct logarithm;
 template <typename T>
 struct square_root;
+template <typename L, typename R>
+struct power;
 
 template <typename T>
 struct is_constant : std::false_type {};
@@ -445,6 +447,61 @@ constexpr auto operator/(L l, R r) noexcept {
   return make_division(as_expr(l), as_expr(r));
 }
 
+template <typename L, typename R>
+constexpr auto make_power(L l, R r) noexcept {
+  return power<L, R>(l, r);
+}
+
+template <typename T>
+constexpr auto make_power(zero, T) noexcept {
+  return zero{};
+}
+
+template <typename T>
+constexpr auto make_power(unity, T) noexcept {
+  return unity{};
+}
+
+template <typename T>
+constexpr auto make_power(T, zero) noexcept {
+  return zero{};
+}
+
+template <typename T>
+constexpr auto make_power(T x, unity) noexcept {
+  return x;
+}
+
+constexpr auto make_power(zero, zero) noexcept {
+  return unity{};
+}
+
+template <typename L, typename R>
+struct power : expression_base<power<L, R>> {
+  using expression_base<power>::derive;
+  [[no_unique_address]] L lhs;
+  [[no_unique_address]] R rhs;
+  constexpr power(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::pow(lhs(xs...), rhs(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_multiplication(
+        *this, make_addition(
+                   make_division(
+                       make_multiplication(lhs.template derive<I>(), rhs), lhs),
+                   make_multiplication(log(lhs), rhs.template derive<I>())));
+  }
+};
+
+template <typename L, typename R,
+          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
+constexpr auto pow(L l, R r) noexcept {
+  return make_power(as_expr(l), as_expr(r));
+}
+
 template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
 constexpr auto operator+(T x) noexcept {
   return x;
@@ -487,6 +544,7 @@ using detail::variable;
 
 using detail::exp;
 using detail::log;
+using detail::pow;
 using detail::sqrt;
 
 inline namespace var {
