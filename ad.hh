@@ -3,6 +3,8 @@
 
 #include <type_traits>
 
+#include <cmath>
+
 namespace ad {
 namespace detail {
 template <typename T>
@@ -364,10 +366,39 @@ constexpr auto operator-(T x) noexcept {
   return make_negation(x);
 }
 
+template <typename T>
+struct exponential;
+
+template <typename T>
+constexpr auto make_exponential(T x) noexcept {
+  return exponential<T>(x);
+}
+
+template <typename T>
+struct exponential : expression_base<exponential<T>> {
+  using expression_base<exponential>::derive;
+  [[no_unique_address]] T arg;
+  constexpr explicit exponential(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::exp(arg(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_multiplication(arg.template derive<I>(), *this);
+  }
+};
+
+template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+constexpr auto exp(T x) noexcept {
+  return make_exponential(x);
+}
 } // namespace detail
 
 using detail::constant;
 using detail::variable;
+
+using detail::exp;
 
 inline namespace var {
 inline constexpr variable<0> _0;
