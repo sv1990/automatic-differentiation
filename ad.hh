@@ -151,6 +151,66 @@ struct variable : expression_base<variable<N>> {
   inline static constexpr std::size_t value = N;
 };
 
+template <typename T>
+constexpr auto make_exponential(T x) noexcept {
+  return exponential<T>(x);
+}
+
+template <typename T>
+constexpr auto make_exponential(logarithm<T> x) noexcept {
+  return x.arg;
+}
+
+template <typename T>
+struct exponential : expression_base<exponential<T>> {
+  using expression_base<exponential>::derive;
+  [[no_unique_address]] T arg;
+  constexpr explicit exponential(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::exp(arg(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_multiplication(arg.template derive<I>(), *this);
+  }
+};
+
+template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+constexpr auto exp(T x) noexcept {
+  return make_exponential(x);
+}
+
+template <typename T>
+constexpr auto make_logarithm(T x) noexcept {
+  return logarithm<T>(x);
+}
+
+template <typename T>
+constexpr auto make_logarithm(exponential<T> x) noexcept {
+  return x.arg;
+}
+
+template <typename T>
+struct logarithm : expression_base<logarithm<T>> {
+  using expression_base<logarithm>::derive;
+  [[no_unique_address]] T arg;
+  constexpr explicit logarithm(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::log(arg(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_division(arg.template derive<I>(), arg);
+  }
+};
+
+template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+constexpr auto log(T x) noexcept {
+  return make_logarithm(x);
+}
+
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
 constexpr addition<L, R> make_addition(L l, R r) noexcept {
@@ -289,6 +349,12 @@ constexpr auto make_multiplication(negation<L> l, negation<R> r) noexcept {
   return make_multiplication(l.arg, r.arg);
 }
 
+template <typename L, typename R>
+constexpr auto make_multiplication(exponential<L> l,
+                                   exponential<R> r) noexcept {
+  return make_exponential(make_addition(l.arg, r.arg));
+}
+
 template <typename L, typename R,
           std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
@@ -319,6 +385,11 @@ constexpr L make_division(L l, unity) noexcept {
 template <typename L, typename R>
 constexpr auto make_division(negation<L> l, negation<R> r) noexcept {
   return make_division(l.arg, r.arg);
+}
+
+template <typename L, typename R>
+constexpr auto make_division(exponential<L> l, exponential<R> r) noexcept {
+  return make_exponential(make_subtraction(l.arg, r.arg));
 }
 
 template <typename L, typename R>
@@ -381,65 +452,6 @@ constexpr auto operator-(T x) noexcept {
   return make_negation(x);
 }
 
-template <typename T>
-constexpr auto make_exponential(T x) noexcept {
-  return exponential<T>(x);
-}
-
-template <typename T>
-constexpr auto make_exponential(logarithm<T> x) noexcept {
-  return x.arg;
-}
-
-template <typename T>
-struct exponential : expression_base<exponential<T>> {
-  using expression_base<exponential>::derive;
-  [[no_unique_address]] T arg;
-  constexpr explicit exponential(T x) noexcept : arg(x) {}
-  template <typename... Ts>
-  constexpr double operator()(Ts... xs) const noexcept {
-    return std::exp(arg(xs...));
-  }
-  template <std::size_t I = 0>
-  constexpr auto derive() const noexcept {
-    return make_multiplication(arg.template derive<I>(), *this);
-  }
-};
-
-template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
-constexpr auto exp(T x) noexcept {
-  return make_exponential(x);
-}
-
-template <typename T>
-constexpr auto make_logarithm(T x) noexcept {
-  return logarithm<T>(x);
-}
-
-template <typename T>
-constexpr auto make_logarithm(exponential<T> x) noexcept {
-  return x.arg;
-}
-
-template <typename T>
-struct logarithm : expression_base<logarithm<T>> {
-  using expression_base<logarithm>::derive;
-  [[no_unique_address]] T arg;
-  constexpr explicit logarithm(T x) noexcept : arg(x) {}
-  template <typename... Ts>
-  constexpr double operator()(Ts... xs) const noexcept {
-    return std::log(arg(xs...));
-  }
-  template <std::size_t I = 0>
-  constexpr auto derive() const noexcept {
-    return make_division(arg.template derive<I>(), arg);
-  }
-};
-
-template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
-constexpr auto log(T x) noexcept {
-  return make_logarithm(x);
-}
 } // namespace detail
 
 using detail::constant;
