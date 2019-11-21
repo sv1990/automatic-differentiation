@@ -26,7 +26,7 @@ int main() {
               << std::setw(colwidth) << std::right << d2f(x) << '\n';
   }
 
-  const auto g   = 1 / x;
+  const auto g   = ad::log(x);
   const auto dg  = g.derive();
   const auto d2g = dg.derive();
 

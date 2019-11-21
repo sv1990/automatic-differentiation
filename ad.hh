@@ -26,6 +26,8 @@ template <typename T>
 struct exponential;
 template <typename T>
 struct logarithm;
+template <typename T>
+struct square_root;
 
 template <typename T>
 struct is_constant : std::false_type {};
@@ -182,6 +184,32 @@ constexpr auto exp(T x) noexcept {
 }
 
 template <typename T>
+constexpr auto make_square_root(T x) noexcept {
+  return square_root<T>(x);
+}
+
+template <typename T>
+struct square_root : expression_base<square_root<T>> {
+  using expression_base<square_root>::derive;
+  [[no_unique_address]] T arg;
+  constexpr explicit square_root(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::sqrt(arg(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_division(arg.template derive<I>(),
+                         make_multiplication(constant{2.0}, *this));
+  }
+};
+
+template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+constexpr auto sqrt(T x) noexcept {
+  return make_square_root(x);
+}
+
+template <typename T>
 constexpr auto make_logarithm(T x) noexcept {
   return logarithm<T>(x);
 }
@@ -334,7 +362,7 @@ constexpr zero make_multiplication(zero, R) noexcept {
   return zero{};
 }
 
-template <typename L>
+template <typename L, std::enable_if_t<!std::is_same_v<L, unity>>* = nullptr>
 constexpr L make_multiplication(L l, unity) noexcept {
   return l;
 }
@@ -459,6 +487,7 @@ using detail::variable;
 
 using detail::exp;
 using detail::log;
+using detail::sqrt;
 
 inline namespace var {
 inline constexpr variable<0> _0;
