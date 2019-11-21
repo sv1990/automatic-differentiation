@@ -284,6 +284,11 @@ constexpr R make_multiplication(unity, R r) noexcept {
   return r;
 }
 
+template <typename L, typename R>
+constexpr auto make_multiplication(negation<L> l, negation<R> r) noexcept {
+  return make_multiplication(l.arg, r.arg);
+}
+
 template <typename L, typename R,
           std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
@@ -309,6 +314,11 @@ constexpr zero make_division(zero, R) noexcept {
 template <typename L>
 constexpr L make_division(L l, unity) noexcept {
   return l;
+}
+
+template <typename L, typename R>
+constexpr auto make_division(negation<L> l, negation<R> r) noexcept {
+  return make_division(l.arg, r.arg);
 }
 
 template <typename L, typename R>
