@@ -30,6 +30,12 @@ template <typename T>
 struct square_root;
 template <typename L, typename R>
 struct power;
+template <typename T>
+struct sinus;
+template <typename T>
+struct cosinus;
+template <typename T>
+struct tangens;
 
 template <typename T>
 struct is_constant : std::false_type {};
@@ -241,6 +247,84 @@ struct logarithm : expression_base<logarithm<T>> {
 template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
 constexpr auto log(T x) noexcept {
   return make_logarithm(x);
+}
+
+template <typename T>
+constexpr auto make_sinus(T x) noexcept {
+  return sinus<T>(x);
+}
+
+template <typename T>
+struct sinus : expression_base<sinus<T>> {
+  using expression_base<sinus>::derive;
+  [[no_unique_address]] T arg;
+  constexpr explicit sinus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::sin(arg(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_multiplication(arg.template derive<I>(), make_cosinus(arg));
+  }
+};
+
+template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+constexpr auto sin(T x) noexcept {
+  return make_sinus(x);
+}
+
+template <typename T>
+constexpr auto make_cosinus(T x) noexcept {
+  return cosinus<T>(x);
+}
+
+template <typename T>
+struct cosinus : expression_base<cosinus<T>> {
+  using expression_base<cosinus>::derive;
+  [[no_unique_address]] T arg;
+  constexpr explicit cosinus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::cos(arg(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_negation(
+        make_multiplication(arg.template derive<I>(), make_sinus(arg)));
+  }
+};
+
+template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+constexpr auto cos(T x) noexcept {
+  return make_cosinus(x);
+}
+
+template <typename T>
+constexpr auto make_tangens(T x) noexcept {
+  return tangens<T>(x);
+}
+
+template <typename T>
+struct tangens : expression_base<tangens<T>> {
+  using expression_base<tangens>::derive;
+  [[no_unique_address]] T arg;
+  constexpr explicit tangens(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::tan(arg(xs...));
+  }
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    return make_multiplication(
+        arg.template derive<I>(),
+        make_addition(unity{}, make_multiplication(*this, *this)));
+  }
+};
+
+template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+constexpr auto tan(T x) noexcept {
+  return make_tangens(x);
 }
 
 template <typename L, typename R,
@@ -545,10 +629,13 @@ constexpr auto operator-(T x) noexcept {
 using detail::constant;
 using detail::variable;
 
+using detail::cos;
 using detail::exp;
 using detail::log;
 using detail::pow;
+using detail::sin;
 using detail::sqrt;
+using detail::tan;
 
 inline namespace var {
 inline constexpr variable<0> _0;
