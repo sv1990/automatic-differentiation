@@ -55,7 +55,7 @@ struct expression_base {
 };
 
 template <typename T>
-constexpr bool is_expr_v = std::is_base_of_v<expression_base<T>, T>;
+constexpr bool is_expression_v = std::is_base_of_v<expression_base<T>, T>;
 
 struct zero : expression_base<zero> {
   using expression_base<zero>::derive;
@@ -111,8 +111,8 @@ template <typename...>
 inline constexpr bool dependent_false = false;
 
 template <typename T>
-constexpr auto as_expr(T x) noexcept {
-  if constexpr (is_expr_v<T>) {
+constexpr auto as_expression(T x) noexcept {
+  if constexpr (is_expression_v<T>) {
     return x;
   }
   else if constexpr (std::is_arithmetic_v<T>) {
@@ -182,7 +182,7 @@ struct exponential : expression_base<exponential<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
 constexpr auto exp(T x) noexcept {
   return make_exponential(x);
 }
@@ -208,7 +208,7 @@ struct square_root : expression_base<square_root<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
 constexpr auto sqrt(T x) noexcept {
   return make_square_root(x);
 }
@@ -238,7 +238,7 @@ struct logarithm : expression_base<logarithm<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
 constexpr auto log(T x) noexcept {
   return make_logarithm(x);
 }
@@ -268,9 +268,9 @@ constexpr R make_addition(zero, R r) noexcept {
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
 constexpr auto operator+(L l, R r) noexcept {
-  return make_addition(as_expr(l), as_expr(r));
+  return make_addition(as_expression(l), as_expression(r));
 }
 
 template <typename L, typename R>
@@ -307,9 +307,9 @@ constexpr L make_subtraction(L l, zero) noexcept {
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
 constexpr auto operator-(L l, R r) noexcept {
-  return make_subtraction(as_expr(l), as_expr(r));
+  return make_subtraction(as_expression(l), as_expression(r));
 }
 
 template <typename L, typename R>
@@ -388,9 +388,9 @@ constexpr auto make_multiplication(exponential<L> l,
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
-  return make_multiplication(as_expr(l), as_expr(r));
+  return make_multiplication(as_expression(l), as_expression(r));
 }
 
 template <typename L, typename R>
@@ -444,9 +444,9 @@ struct division : expression_base<division<L, R>> {
 };
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
 constexpr auto operator/(L l, R r) noexcept {
-  return make_division(as_expr(l), as_expr(r));
+  return make_division(as_expression(l), as_expression(r));
 }
 
 template <typename L, typename R>
@@ -499,12 +499,12 @@ struct power : expression_base<power<L, R>> {
 };
 
 template <typename L, typename R,
-          std::enable_if_t<is_expr_v<L> || is_expr_v<R>>* = nullptr>
+          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
 constexpr auto pow(L l, R r) noexcept {
-  return make_power(as_expr(l), as_expr(r));
+  return make_power(as_expression(l), as_expression(r));
 }
 
-template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
 constexpr auto operator+(T x) noexcept {
   return x;
 }
@@ -534,7 +534,7 @@ struct negation : expression_base<negation<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expr_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
 constexpr auto operator-(T x) noexcept {
   return make_negation(x);
 }
