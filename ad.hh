@@ -498,6 +498,16 @@ constexpr L make_division(L l, unity) noexcept {
   return l;
 }
 
+template <typename T, typename L, typename R>
+constexpr auto make_division(T l, division<L, R> r) noexcept {
+  return make_division(make_multiplication(l, r.rhs), r.lhs);
+}
+
+template <typename L, typename R, typename T>
+constexpr auto make_division(division<L, R> l, T r) noexcept {
+  return make_division(l.lhs, make_multiplication(l.rhs, r));
+}
+
 template <typename L, typename R>
 constexpr auto make_division(negation<L> l, negation<R> r) noexcept {
   return make_division(l.arg, r.arg);
