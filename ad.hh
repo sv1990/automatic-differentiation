@@ -494,7 +494,8 @@ struct power : expression_base<power<L, R>> {
         *this, make_addition(
                    make_division(
                        make_multiplication(lhs.template derive<I>(), rhs), lhs),
-                   make_multiplication(log(lhs), rhs.template derive<I>())));
+                   make_multiplication(make_logarithm(lhs),
+                                       rhs.template derive<I>())));
   }
 };
 
