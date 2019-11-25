@@ -41,7 +41,7 @@ template <typename T>
 struct is_constant : std::false_type {};
 
 template <typename T>
-constexpr bool is_constant_v = is_constant<T>::value;
+inline constexpr bool is_constant_v = is_constant<T>::value;
 
 template <typename T>
 struct is_variable : std::false_type {};
@@ -76,7 +76,8 @@ struct expression_base {
 };
 
 template <typename T>
-constexpr bool is_expression_v = std::is_base_of_v<expression_base<T>, T>;
+inline constexpr bool is_expression_v =
+    std::is_base_of_v<expression_base<T>, T>;
 
 struct zero : expression_base<zero> {
   using expression_base<zero>::derive;
