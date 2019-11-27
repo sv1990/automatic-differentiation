@@ -140,7 +140,8 @@ constexpr auto as_expression(T x) noexcept {
     return constant{static_cast<double>(x)};
   }
   else {
-    static_assert(dependent_false<T>, "ad expects arithmetic types!");
+    static_assert(dependent_false<T>,
+                  "Wrong type passed! ad expects arithmetic types!");
   }
 }
 
