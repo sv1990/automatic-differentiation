@@ -204,7 +204,7 @@ struct exponential : expression_base<exponential<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+template <typename T>
 constexpr auto exp(T x) noexcept {
   return make_exponential(x);
 }
@@ -230,7 +230,7 @@ struct square_root : expression_base<square_root<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+template <typename T>
 constexpr auto sqrt(T x) noexcept {
   return make_square_root(x);
 }
@@ -260,7 +260,7 @@ struct logarithm : expression_base<logarithm<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+template <typename T>
 constexpr auto log(T x) noexcept {
   return make_logarithm(x);
 }
@@ -285,7 +285,7 @@ struct sinus : expression_base<sinus<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+template <typename T>
 constexpr auto sin(T x) noexcept {
   return make_sinus(x);
 }
@@ -311,7 +311,7 @@ struct cosinus : expression_base<cosinus<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+template <typename T>
 constexpr auto cos(T x) noexcept {
   return make_cosinus(x);
 }
@@ -338,7 +338,7 @@ struct tangens : expression_base<tangens<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+template <typename T>
 constexpr auto tan(T x) noexcept {
   return make_tangens(x);
 }
@@ -367,8 +367,7 @@ constexpr R make_addition(zero, R r) noexcept {
   return r;
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
+template <typename L, typename R>
 constexpr auto operator+(L l, R r) noexcept {
   return make_addition(as_expression(l), as_expression(r));
 }
@@ -406,8 +405,7 @@ constexpr L make_subtraction(L l, zero) noexcept {
   return l;
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
+template <typename L, typename R>
 constexpr auto operator-(L l, R r) noexcept {
   return make_subtraction(as_expression(l), as_expression(r));
 }
@@ -487,8 +485,7 @@ constexpr auto make_multiplication(exponential<L> l,
   return make_exponential(make_addition(l.arg, r.arg));
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
+template <typename L, typename R>
 constexpr auto operator*(L l, R r) noexcept {
   return make_multiplication(as_expression(l), as_expression(r));
 }
@@ -553,8 +550,7 @@ struct division : expression_base<division<L, R>> {
   }
 };
 
-template <typename L, typename R,
-          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
+template <typename L, typename R>
 constexpr auto operator/(L l, R r) noexcept {
   return make_division(as_expression(l), as_expression(r));
 }
@@ -609,13 +605,12 @@ struct power : expression_base<power<L, R>> {
   }
 };
 
-template <typename L, typename R,
-          std::enable_if_t<is_expression_v<L> || is_expression_v<R>>* = nullptr>
+template <typename L, typename R>
 constexpr auto pow(L l, R r) noexcept {
   return make_power(as_expression(l), as_expression(r));
 }
 
-template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+template <typename T>
 constexpr auto operator+(T x) noexcept {
   return x;
 }
@@ -645,7 +640,7 @@ struct negation : expression_base<negation<T>> {
   }
 };
 
-template <typename T, std::enable_if_t<is_expression_v<T>>* = nullptr>
+template <typename T>
 constexpr auto operator-(T x) noexcept {
   return make_negation(x);
 }
