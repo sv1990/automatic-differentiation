@@ -12,6 +12,8 @@ int main() {
   const auto dxf = f.derive(x);
   const auto dyf = f.derive(y);
 
+  [[maybe_unused]] const auto dxyf = f.derive(x, y);
+
   int colwidth = 3;
   for (double x = -5; x <= 5; x += 1) {
     for (double y = -5; y <= 5; y += 1) {

@@ -65,8 +65,7 @@ struct expression_base {
   constexpr auto derive(Ts...) const noexcept {
     return static_cast<const Derived&>(*this).template derive<Ts::value...>();
   }
-  template <std::size_t I, std::size_t... Is,
-            std::enable_if_t<(sizeof...(Is) > 0)>* = nullptr>
+  template <std::size_t I, std::size_t... Is>
   constexpr auto derive() const noexcept {
     return static_cast<const Derived&>(*this)
         .template derive<I>()
