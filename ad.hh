@@ -443,7 +443,8 @@ struct multiplication : expression_base<multiplication<L, R>> {
   }
 };
 
-template <typename L, typename R>
+template <typename L, typename R,
+          std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
 constexpr multiplication<L, R> make_multiplication(L l, R r) noexcept {
   return multiplication<L, R>(l, r);
 }
@@ -490,7 +491,8 @@ constexpr auto operator*(L l, R r) noexcept {
   return make_multiplication(as_expression(l), as_expression(r));
 }
 
-template <typename L, typename R>
+template <typename L, typename R,
+          std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
 constexpr division<L, R> make_division(L l, R r) noexcept {
   return division<L, R>(l, r);
 }
