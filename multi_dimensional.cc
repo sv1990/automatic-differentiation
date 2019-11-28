@@ -12,7 +12,9 @@ int main() {
   const auto dxf = f.derive(x);
   const auto dyf = f.derive(y);
 
+#ifndef __clang__
   [[maybe_unused]] const auto dxyf = f.derive(x, y);
+#endif
 
   int colwidth = 3;
   for (double x = -5; x <= 5; x += 1) {
