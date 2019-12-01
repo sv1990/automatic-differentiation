@@ -1,6 +1,6 @@
 # AD: Automatic differentiation
 
-This library allows you to take the exact derivative of any function at compile time. 
+This library allows you to take the exact derivative of any function at compile time.
 
 ## Examples
 
@@ -22,7 +22,7 @@ constexpr auto d2f = df.derive();
 std::cout << d2f(5) << '\n';
 ```
 
-It is also possible to use the functions 
+It is also possible to use the functions
 
 * `ad::cos`
 * `ad::exp`
@@ -30,6 +30,7 @@ It is also possible to use the functions
 * `ad::sin`
 * `ad::sqrt`
 * `ad::tan`
+* `ad::log`
 
 ### Multidimensional
 
