@@ -9,8 +9,6 @@ namespace ad {
 namespace detail {
 template <std::size_t N>
 struct variable;
-struct zero;
-struct unity;
 struct constant;
 template <typename L, typename R>
 struct addition;
@@ -89,37 +87,25 @@ template <typename T>
 inline constexpr bool is_expression_v =
     std::is_base_of_v<expression_base<T>, T>;
 
-struct zero : expression_base<zero> {
-  using expression_base<zero>::derive;
-  constexpr double value() const noexcept { return 0; }
+template <long N>
+struct integral_constant : expression_base<integral_constant<N>> {
+  using expression_base<integral_constant<N>>::derive;
+  constexpr double value() const noexcept { return static_cast<double>(N); }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
-    return 0;
+    return value();
   }
   template <std::size_t = 0>
   constexpr auto derive() const noexcept {
-    return zero{};
+    return integral_constant<0>{};
   }
 };
 
-struct unity : expression_base<unity> {
-  using expression_base<unity>::derive;
-  constexpr double value() const noexcept { return 1; }
-  template <typename... Ts>
-  constexpr double operator()(Ts...) const noexcept {
-    return 1;
-  }
-  template <std::size_t = 0>
-  constexpr auto derive() const noexcept {
-    return zero{};
-  }
-};
+template <long N>
+struct is_constant<integral_constant<N>> : std::true_type {};
 
-template <>
-struct is_constant<zero> : std::true_type {};
-
-template <>
-struct is_constant<unity> : std::true_type {};
+using zero  = integral_constant<0>;
+using unity = integral_constant<1>;
 
 struct constant : expression_base<constant> {
   using expression_base<constant>::derive;
