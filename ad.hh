@@ -650,12 +650,18 @@ struct power : expression_base<power<L, R>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_multiplication(
-        *this, make_addition(
-                   make_division(
-                       make_multiplication(lhs.template derive<I>(), rhs), lhs),
-                   make_multiplication(make_logarithm(lhs),
-                                       rhs.template derive<I>())));
+    if constexpr (is_constant_v<R>) {
+      return make_multiplication(
+          rhs, make_power(lhs, make_subtraction(rhs, unity{})));
+    }
+    else {
+      return make_multiplication(
+          *this, make_addition(make_division(make_multiplication(
+                                                 lhs.template derive<I>(), rhs),
+                                             lhs),
+                               make_multiplication(make_logarithm(lhs),
+                                                   rhs.template derive<I>())));
+    }
   }
 };
 
