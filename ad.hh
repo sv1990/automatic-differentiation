@@ -85,7 +85,8 @@ struct function_expression : expression_base<function_expression<Derived>> {
 
 template <typename T>
 inline constexpr bool is_expression_v =
-    std::is_base_of_v<expression_base<T>, T>;
+    std::is_base_of_v<expression_base<T>, T> ||
+    std::is_base_of_v<function_expression<T>, T>;
 
 template <long N>
 struct integral_constant : expression_base<integral_constant<N>> {
