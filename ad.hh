@@ -224,7 +224,8 @@ struct square_root : function_expression<square_root<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_division(unity{}, make_multiplication(constant{2.0}, *this));
+    return make_division(unity{},
+                         make_multiplication(integral_constant<2>{}, *this));
   }
 };
 
