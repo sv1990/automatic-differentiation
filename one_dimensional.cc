@@ -4,11 +4,14 @@
 #include <iostream>
 
 int main() {
+  using namespace ad::literals;
   constexpr auto x = ad::_0;
 
-  const auto f   = (x + 1) * (x - 1);
+  const auto f   = (x + 1_c) * (x - 1_c);
   const auto df  = f.derive();
   const auto d2f = df.derive();
+
+  static_assert(sizeof(f) < sizeof((x + 1) * (x - 1)));
 
   int colwidth = 7;
   std::cout << std::setw(colwidth) << std::right << "x" << ' '     //
