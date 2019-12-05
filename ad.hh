@@ -597,10 +597,15 @@ struct division : expression_base<division<L, R>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_division(
-        make_subtraction(make_multiplication(lhs.template derive<I>(), rhs),
-                         make_multiplication(lhs, rhs.template derive<I>())),
-        make_multiplication(rhs, rhs));
+    if constexpr (is_constant_v<R>) {
+      return make_division(lhs.template derive<I>(), rhs);
+    }
+    else {
+      return make_division(
+          make_subtraction(make_multiplication(lhs.template derive<I>(), rhs),
+                           make_multiplication(lhs, rhs.template derive<I>())),
+          make_multiplication(rhs, rhs));
+    }
   }
 };
 
