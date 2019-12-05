@@ -36,8 +36,8 @@ It is also possible to use the functions
 
 ```C++
 // Define a variable names
-constexpr auto x = ad::0;
-constexpr auto y = ad::1;
+constexpr auto x = ad::_0;
+constexpr auto y = ad::_1;
 
 // Define the function
 constexpr auto f = x * x * y;
