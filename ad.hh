@@ -743,12 +743,12 @@ constexpr long parse_integral(const char* s, std::ptrdiff_t n) noexcept {
 } // namespace detail
 
 inline namespace literals {
-constexpr constant operator""_c(long double x) {
+constexpr constant operator""_c(long double x) noexcept {
   return constant{static_cast<double>(x)};
 }
 
 template <char... cs>
-constexpr auto operator""_c() {
+constexpr auto operator""_c() noexcept {
   constexpr const char s[] = {cs...};
   return detail::integral_constant<detail::parse_integral(s, sizeof...(cs))>{};
 }
