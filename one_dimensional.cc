@@ -4,11 +4,16 @@
 #include <iostream>
 
 int main() {
+  using namespace ad::literals;
   constexpr auto x = ad::_0;
 
-  const auto f   = (x + 1) * (x - 1);
+  const auto f   = (x + 1_c) * (x - 1_c);
   const auto df  = f.derive();
   const auto d2f = df.derive();
+
+  static_assert(sizeof(f) < sizeof((x + 1) * (x - 1)));
+  static_assert(
+      std::is_same_v<std::decay_t<decltype(d2f)>, std::decay_t<decltype(2_c)>>);
 
   int colwidth = 7;
   std::cout << std::setw(colwidth) << std::right << "x" << ' '     //

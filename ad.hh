@@ -9,8 +9,6 @@ namespace ad {
 namespace detail {
 template <std::size_t N>
 struct variable;
-struct zero;
-struct unity;
 struct constant;
 template <typename L, typename R>
 struct addition;
@@ -74,41 +72,50 @@ struct expression_base {
 #endif
 };
 
+template <typename Derived>
+struct function_expression : expression_base<function_expression<Derived>> {
+  using expression_base<function_expression<Derived>>::derive;
+  template <std::size_t I = 0>
+  constexpr auto derive() const noexcept {
+    const Derived& derived = static_cast<const Derived&>(*this);
+    return make_multiplication(derived.arg.template derive<I>(),
+                               derived.derive_outer());
+  }
+};
+
 template <typename T>
 inline constexpr bool is_expression_v =
-    std::is_base_of_v<expression_base<T>, T>;
+    std::is_base_of_v<expression_base<T>, T> ||
+    std::is_base_of_v<function_expression<T>, T>;
 
-struct zero : expression_base<zero> {
-  using expression_base<zero>::derive;
-  constexpr double value() const noexcept { return 0; }
+template <long N>
+struct integral_constant : expression_base<integral_constant<N>> {
+  using expression_base<integral_constant<N>>::derive;
+  constexpr double value() const noexcept { return static_cast<double>(N); }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
-    return 0;
+    return value();
   }
   template <std::size_t = 0>
   constexpr auto derive() const noexcept {
-    return zero{};
+    return integral_constant<0>{};
   }
 };
 
-struct unity : expression_base<unity> {
-  using expression_base<unity>::derive;
-  constexpr double value() const noexcept { return 1; }
-  template <typename... Ts>
-  constexpr double operator()(Ts...) const noexcept {
-    return 1;
-  }
-  template <std::size_t = 0>
-  constexpr auto derive() const noexcept {
-    return zero{};
-  }
-};
+template <long N>
+struct is_constant<integral_constant<N>> : std::true_type {};
 
-template <>
-struct is_constant<zero> : std::true_type {};
+template <typename T>
+struct is_integral_constant : std::false_type {};
 
-template <>
-struct is_constant<unity> : std::true_type {};
+template <long N>
+struct is_integral_constant<integral_constant<N>> : std::true_type {};
+
+template <typename T>
+inline constexpr bool is_integral_constant_v = is_integral_constant<T>::value;
+
+using zero  = integral_constant<0>;
+using unity = integral_constant<1>;
 
 struct constant : expression_base<constant> {
   using expression_base<constant>::derive;
@@ -190,18 +197,18 @@ constexpr auto make_exponential(logarithm<T> x) noexcept {
 }
 
 template <typename T>
-struct exponential : expression_base<exponential<T>> {
-  using expression_base<exponential>::derive;
+struct exponential : function_expression<exponential<T>> {
+  using function_expression<exponential>::derive;
+  friend class function_expression<exponential<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit exponential(T x) noexcept : arg(x) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::exp(arg(xs...));
   }
-  template <std::size_t I = 0>
-  constexpr auto derive() const noexcept {
-    return make_multiplication(arg.template derive<I>(), *this);
-  }
+
+private:
+  constexpr auto derive_outer() const noexcept { return *this; }
 };
 
 template <typename T>
@@ -215,18 +222,20 @@ constexpr auto make_square_root(T x) noexcept {
 }
 
 template <typename T>
-struct square_root : expression_base<square_root<T>> {
-  using expression_base<square_root>::derive;
+struct square_root : function_expression<square_root<T>> {
+  using function_expression<square_root>::derive;
+  friend class function_expression<square_root<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit square_root(T x) noexcept : arg(x) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::sqrt(arg(xs...));
   }
-  template <std::size_t I = 0>
-  constexpr auto derive() const noexcept {
-    return make_division(arg.template derive<I>(),
-                         make_multiplication(constant{2.0}, *this));
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_division(unity{},
+                         make_multiplication(integral_constant<2>{}, *this));
   }
 };
 
@@ -246,17 +255,19 @@ constexpr auto make_logarithm(exponential<T> x) noexcept {
 }
 
 template <typename T>
-struct logarithm : expression_base<logarithm<T>> {
-  using expression_base<logarithm>::derive;
+struct logarithm : function_expression<logarithm<T>> {
+  using function_expression<logarithm>::derive;
+  friend class function_expression<logarithm<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit logarithm(T x) noexcept : arg(x) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::log(arg(xs...));
   }
-  template <std::size_t I = 0>
-  constexpr auto derive() const noexcept {
-    return make_division(arg.template derive<I>(), arg);
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_division(unity{}, arg);
   }
 };
 
@@ -271,18 +282,18 @@ constexpr auto make_sinus(T x) noexcept {
 }
 
 template <typename T>
-struct sinus : expression_base<sinus<T>> {
-  using expression_base<sinus>::derive;
+struct sinus : function_expression<sinus<T>> {
+  using function_expression<sinus>::derive;
+  friend class function_expression<sinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit sinus(T x) noexcept : arg(x) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::sin(arg(xs...));
   }
-  template <std::size_t I = 0>
-  constexpr auto derive() const noexcept {
-    return make_multiplication(arg.template derive<I>(), make_cosinus(arg));
-  }
+
+private:
+  constexpr auto derive_outer() const noexcept { return make_cosinus(arg); }
 };
 
 template <typename T>
@@ -296,18 +307,19 @@ constexpr auto make_cosinus(T x) noexcept {
 }
 
 template <typename T>
-struct cosinus : expression_base<cosinus<T>> {
-  using expression_base<cosinus>::derive;
+struct cosinus : function_expression<cosinus<T>> {
+  using function_expression<cosinus>::derive;
+  friend class function_expression<cosinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit cosinus(T x) noexcept : arg(x) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::cos(arg(xs...));
   }
-  template <std::size_t I = 0>
-  constexpr auto derive() const noexcept {
-    return make_negation(
-        make_multiplication(arg.template derive<I>(), make_sinus(arg)));
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_negation(make_sinus(arg));
   }
 };
 
@@ -322,19 +334,19 @@ constexpr auto make_tangens(T x) noexcept {
 }
 
 template <typename T>
-struct tangens : expression_base<tangens<T>> {
-  using expression_base<tangens>::derive;
+struct tangens : function_expression<tangens<T>> {
+  using function_expression<tangens>::derive;
+  friend class function_expression<tangens<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit tangens(T x) noexcept : arg(x) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::tan(arg(xs...));
   }
-  template <std::size_t I = 0>
-  constexpr auto derive() const noexcept {
-    return make_multiplication(
-        arg.template derive<I>(),
-        make_addition(unity{}, make_multiplication(*this, *this)));
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_addition(unity{}, make_multiplication(*this, *this));
   }
 };
 
@@ -351,20 +363,26 @@ constexpr addition<L, R> make_addition(L l, R r) noexcept {
 
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
-                           (!std::is_same_v<L, zero> ||
-                            !std::is_same_v<R, zero>)>* = nullptr>
+                           (!is_integral_constant_v<L> ||
+                            !is_integral_constant_v<R>)>* = nullptr>
 constexpr constant make_addition(L l, R r) noexcept {
   return constant{l.value() + r.value()};
 }
 
-template <typename L, std::enable_if_t<!std::is_same_v<L, zero>>* = nullptr>
-constexpr L make_addition(L l, zero) noexcept {
-  return l;
+template <long N1, long N2>
+constexpr auto make_addition(integral_constant<N1>,
+                             integral_constant<N2>) noexcept {
+  return integral_constant<N1 + N2>{};
 }
 
-template <typename R>
-constexpr R make_addition(zero, R r) noexcept {
-  return r;
+template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+constexpr auto make_addition(zero, T x) noexcept {
+  return x;
+}
+
+template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+constexpr auto make_addition(T x, zero) noexcept {
+  return x;
 }
 
 template <typename L, typename R>
@@ -395,14 +413,27 @@ constexpr subtraction<L, R> make_subtraction(L l, R r) noexcept {
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
+                           (!is_integral_constant_v<L> ||
+                            !is_integral_constant_v<R>)>* = nullptr>
 constexpr constant make_subtraction(L l, R r) noexcept {
   return constant{l.value() - r.value()};
 }
 
-template <typename L>
-constexpr L make_subtraction(L l, zero) noexcept {
-  return l;
+template <long N1, long N2>
+constexpr auto make_subtraction(integral_constant<N1>,
+                                integral_constant<N2>) noexcept {
+  return integral_constant<N1 - N2>{};
+}
+
+template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+constexpr T make_subtraction(T x, zero) noexcept {
+  return x;
+}
+
+template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+constexpr T make_subtraction(zero, T x) noexcept {
+  return make_negation(x);
 }
 
 template <typename L, typename R>
@@ -450,29 +481,37 @@ constexpr multiplication<L, R> make_multiplication(L l, R r) noexcept {
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
+                           (!is_integral_constant_v<L> ||
+                            !is_integral_constant_v<R>)>* = nullptr>
 constexpr constant make_multiplication(L l, R r) noexcept {
   return constant{l.value() * r.value()};
 }
 
-template <typename L>
-constexpr zero make_multiplication(L, zero) noexcept {
+template <long N1, long N2>
+constexpr auto make_multiplication(integral_constant<N1>,
+                                   integral_constant<N2>) noexcept {
+  return integral_constant<N1 * N2>{};
+}
+
+template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+constexpr zero make_multiplication(T, zero) noexcept {
   return zero{};
 }
 
-template <typename R>
-constexpr zero make_multiplication(zero, R) noexcept {
+template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+constexpr zero make_multiplication(zero, T) noexcept {
   return zero{};
 }
 
-template <typename L, std::enable_if_t<!std::is_same_v<L, unity>>* = nullptr>
-constexpr L make_multiplication(L l, unity) noexcept {
-  return l;
+template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+constexpr T make_multiplication(T x, unity) noexcept {
+  return x;
 }
 
-template <typename R>
-constexpr R make_multiplication(unity, R r) noexcept {
-  return r;
+template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+constexpr T make_multiplication(unity, T x) noexcept {
+  return x;
 }
 
 template <typename L, typename R>
@@ -486,6 +525,18 @@ constexpr auto make_multiplication(exponential<L> l,
   return make_exponential(make_addition(l.arg, r.arg));
 }
 
+template <typename L, typename R,
+          std::enable_if_t<!std::is_same_v<L, unity>>* = nullptr>
+constexpr auto make_multiplication(L l, division<unity, R> r) noexcept {
+  return make_division(l, r.rhs);
+}
+
+template <typename L, typename R,
+          std::enable_if_t<!std::is_same_v<R, unity>>* = nullptr>
+constexpr auto make_multiplication(division<unity, L> l, R r) noexcept {
+  return make_division(r, l.rhs);
+}
+
 template <typename L, typename R>
 constexpr auto operator*(L l, R r) noexcept {
   return make_multiplication(as_expression(l), as_expression(r));
@@ -497,6 +548,7 @@ constexpr division<L, R> make_division(L l, R r) noexcept {
   return division<L, R>(l, r);
 }
 
+// TODO: Overload for integral_constant?
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr constant make_division(L l, R r) noexcept {
@@ -598,12 +650,18 @@ struct power : expression_base<power<L, R>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_multiplication(
-        *this, make_addition(
-                   make_division(
-                       make_multiplication(lhs.template derive<I>(), rhs), lhs),
-                   make_multiplication(make_logarithm(lhs),
-                                       rhs.template derive<I>())));
+    if constexpr (is_constant_v<R>) {
+      return make_multiplication(
+          rhs, make_power(lhs, make_subtraction(rhs, unity{})));
+    }
+    else {
+      return make_multiplication(
+          *this, make_addition(make_division(make_multiplication(
+                                                 lhs.template derive<I>(), rhs),
+                                             lhs),
+                               make_multiplication(make_logarithm(lhs),
+                                                   rhs.template derive<I>())));
+    }
   }
 };
 
@@ -673,14 +731,27 @@ inline constexpr variable<8> _8;
 inline constexpr variable<9> _9;
 } // namespace var
 
-inline namespace literals {
-constexpr constant operator""_c(long double x) {
-  return constant{static_cast<double>(x)};
+namespace detail {
+constexpr long parse_integral(const char* s, std::ptrdiff_t n) noexcept {
+  long res = 0;
+  for (std::ptrdiff_t i = n - 1; i >= 0; --i) {
+    res *= 10;
+    res += s[i] - '0';
+  }
+  return res;
 }
-constexpr constant operator""_c(unsigned long long x) {
+} // namespace detail
+
+inline namespace literals {
+constexpr constant operator""_c(long double x) noexcept {
   return constant{static_cast<double>(x)};
 }
 
+template <char... cs>
+constexpr auto operator""_c() noexcept {
+  constexpr const char s[] = {cs...};
+  return detail::integral_constant<detail::parse_integral(s, sizeof...(cs))>{};
+}
 } // namespace literals
 } // namespace ad
 

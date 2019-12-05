@@ -30,6 +30,7 @@ It is also possible to use the functions
 * `ad::sin`
 * `ad::sqrt`
 * `ad::tan`
+* `ad::log`
 
 ### Multidimensional
 
