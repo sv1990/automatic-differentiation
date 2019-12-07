@@ -710,9 +710,6 @@ constexpr auto operator-(T x) noexcept {
   return make_negation(x);
 }
 
-} // namespace detail
-
-namespace detail {
 constexpr long parse_integral(const char* s, std::ptrdiff_t n) noexcept {
   long res = 0;
   for (std::ptrdiff_t i = n - 1; i >= 0; --i) {
