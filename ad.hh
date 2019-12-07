@@ -743,7 +743,7 @@ using detail::sin;
 using detail::sqrt;
 using detail::tan;
 
-inline namespace var {
+inline namespace vars {
 inline constexpr variable<0> _0;
 inline constexpr variable<1> _1;
 inline constexpr variable<2> _2;
@@ -754,7 +754,7 @@ inline constexpr variable<6> _6;
 inline constexpr variable<7> _7;
 inline constexpr variable<8> _8;
 inline constexpr variable<9> _9;
-} // namespace var
+} // namespace vars
 
 } // namespace ad
 
