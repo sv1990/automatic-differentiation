@@ -712,6 +712,29 @@ constexpr auto operator-(T x) noexcept {
 
 } // namespace detail
 
+namespace detail {
+constexpr long parse_integral(const char* s, std::ptrdiff_t n) noexcept {
+  long res = 0;
+  for (std::ptrdiff_t i = n - 1; i >= 0; --i) {
+    res *= 10;
+    res += s[i] - '0';
+  }
+  return res;
+}
+} // namespace detail
+
+inline namespace literals {
+constexpr auto operator""_c(long double x) noexcept {
+  return detail::constant{static_cast<double>(x)};
+}
+
+template <char... cs>
+constexpr auto operator""_c() noexcept {
+  constexpr const char s[] = {cs...};
+  return detail::integral_constant<detail::parse_integral(s, sizeof...(cs))>{};
+}
+} // namespace literals
+
 using detail::constant;
 using detail::variable;
 
@@ -736,28 +759,6 @@ inline constexpr variable<8> _8;
 inline constexpr variable<9> _9;
 } // namespace var
 
-namespace detail {
-constexpr long parse_integral(const char* s, std::ptrdiff_t n) noexcept {
-  long res = 0;
-  for (std::ptrdiff_t i = n - 1; i >= 0; --i) {
-    res *= 10;
-    res += s[i] - '0';
-  }
-  return res;
-}
-} // namespace detail
-
-inline namespace literals {
-constexpr constant operator""_c(long double x) noexcept {
-  return constant{static_cast<double>(x)};
-}
-
-template <char... cs>
-constexpr auto operator""_c() noexcept {
-  constexpr const char s[] = {cs...};
-  return detail::integral_constant<detail::parse_integral(s, sizeof...(cs))>{};
-}
-} // namespace literals
 } // namespace ad
 
 #endif // AUTOMATICDIFFERENTIATION_AD_HH_1574234361739842350_
