@@ -199,7 +199,7 @@ constexpr auto make_exponential(logarithm<T> x) noexcept {
 template <typename T>
 struct exponential : function_expression<exponential<T>> {
   using function_expression<exponential>::derive;
-  friend class function_expression<exponential<T>>;
+  friend struct function_expression<exponential<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit exponential(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -224,7 +224,7 @@ constexpr auto make_square_root(T x) noexcept {
 template <typename T>
 struct square_root : function_expression<square_root<T>> {
   using function_expression<square_root>::derive;
-  friend class function_expression<square_root<T>>;
+  friend struct function_expression<square_root<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit square_root(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -257,7 +257,7 @@ constexpr auto make_logarithm(exponential<T> x) noexcept {
 template <typename T>
 struct logarithm : function_expression<logarithm<T>> {
   using function_expression<logarithm>::derive;
-  friend class function_expression<logarithm<T>>;
+  friend struct function_expression<logarithm<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit logarithm(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -284,7 +284,7 @@ constexpr auto make_sinus(T x) noexcept {
 template <typename T>
 struct sinus : function_expression<sinus<T>> {
   using function_expression<sinus>::derive;
-  friend class function_expression<sinus<T>>;
+  friend struct function_expression<sinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit sinus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -309,7 +309,7 @@ constexpr auto make_cosinus(T x) noexcept {
 template <typename T>
 struct cosinus : function_expression<cosinus<T>> {
   using function_expression<cosinus>::derive;
-  friend class function_expression<cosinus<T>>;
+  friend struct function_expression<cosinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit cosinus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -336,7 +336,7 @@ constexpr auto make_tangens(T x) noexcept {
 template <typename T>
 struct tangens : function_expression<tangens<T>> {
   using function_expression<tangens>::derive;
-  friend class function_expression<tangens<T>>;
+  friend struct function_expression<tangens<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit tangens(T x) noexcept : arg(x) {}
   template <typename... Ts>
