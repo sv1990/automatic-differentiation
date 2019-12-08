@@ -477,8 +477,8 @@ struct arcus_sinus : function_expression<arcus_sinus<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_division(make_square_root(
-        make_subtraction(unity{}, make_multiplication(arg, arg))));
+    return make_division(unity{}, make_square_root(make_subtraction(
+                                      unity{}, make_multiplication(arg, arg))));
   }
 };
 template <typename T>
@@ -507,8 +507,9 @@ struct arcus_cosinus : function_expression<arcus_cosinus<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_negation(make_division(make_square_root(
-        make_subtraction(unity{}, make_multiplication(arg, arg)))));
+    return make_negation(
+        make_division(unity{}, make_square_root(make_subtraction(
+                                   unity{}, make_multiplication(arg, arg)))));
   }
 };
 template <typename T>
@@ -618,12 +619,12 @@ constexpr auto make_subtraction(integral_constant<N1>,
 }
 
 template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
-constexpr T make_subtraction(T x, zero) noexcept {
+constexpr auto make_subtraction(T x, zero) noexcept {
   return x;
 }
 
 template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
-constexpr T make_subtraction(zero, T x) noexcept {
+constexpr auto make_subtraction(zero, T x) noexcept {
   return make_negation(x);
 }
 
