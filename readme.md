@@ -34,6 +34,9 @@ It is also possible to use the functions
 * `ad::sinh`
 * `ad::cosh`
 * `ad::tanh`
+* `ad::asin`
+* `ad::acos`
+* `ad::atan`
 
 ### Multidimensional
 

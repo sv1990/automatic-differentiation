@@ -40,6 +40,12 @@ template <typename T>
 struct cosinus_hyperbolicus;
 template <typename T>
 struct tangens_hyperbolicus;
+template <typename T>
+struct arcus_sinus;
+template <typename T>
+struct arcus_cosinus;
+template <typename T>
+struct arcus_tangens;
 
 template <typename T>
 struct is_constant : std::false_type {};
@@ -286,6 +292,10 @@ template <typename T>
 constexpr auto make_sinus(T x) noexcept {
   return sinus<T>(x);
 }
+template <typename T>
+constexpr auto make_sinus(arcus_sinus<T> x) noexcept {
+  return x.arg;
+}
 
 template <typename T>
 struct sinus : function_expression<sinus<T>> {
@@ -313,6 +323,11 @@ constexpr auto make_cosinus(T x) noexcept {
 }
 
 template <typename T>
+constexpr auto make_cosinus(arcus_cosinus<T> x) noexcept {
+  return x.arg;
+}
+
+template <typename T>
 struct cosinus : function_expression<cosinus<T>> {
   using function_expression<cosinus>::derive;
   friend struct function_expression<cosinus<T>>;
@@ -337,6 +352,10 @@ constexpr auto cos(T x) noexcept {
 template <typename T>
 constexpr auto make_tangens(T x) noexcept {
   return tangens<T>(x);
+}
+template <typename T>
+constexpr auto make_tangens(arcus_tangens<T> x) noexcept {
+  return x.arg;
 }
 
 template <typename T>
@@ -435,6 +454,96 @@ private:
 template <typename T>
 constexpr auto tanh(T x) noexcept {
   return make_tangens_hyperbolicus(x);
+}
+
+template <typename T>
+constexpr auto make_arcus_sinus(T x) noexcept {
+  return arcus_sinus<T>(x);
+}
+template <typename T>
+constexpr auto make_arcus_sinus(sinus<T> x) noexcept {
+  return x.arg;
+}
+template <typename T>
+struct arcus_sinus : function_expression<arcus_sinus<T>> {
+  using function_expression<arcus_sinus>::derive;
+  friend struct function_expression<arcus_sinus<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit arcus_sinus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::asin(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_division(make_square_root(
+        make_subtraction(unity{}, make_multiplication(arg, arg))));
+  }
+};
+template <typename T>
+constexpr auto asin(T x) noexcept {
+  return make_arcus_sinus(x);
+}
+
+template <typename T>
+constexpr auto make_arcus_cosinus(T x) noexcept {
+  return arcus_cosinus<T>(x);
+}
+template <typename T>
+constexpr auto make_arcus_cosinus(cosinus<T> x) noexcept {
+  return x.arg;
+}
+template <typename T>
+struct arcus_cosinus : function_expression<arcus_cosinus<T>> {
+  using function_expression<arcus_cosinus>::derive;
+  friend struct function_expression<arcus_cosinus<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit arcus_cosinus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::acos(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_negation(make_division(make_square_root(
+        make_subtraction(unity{}, make_multiplication(arg, arg)))));
+  }
+};
+template <typename T>
+constexpr auto acos(T x) noexcept {
+  return make_arcus_cosinus(x);
+}
+
+template <typename T>
+constexpr auto make_arcus_tangens(T x) noexcept {
+  return arcus_tangens<T>(x);
+}
+template <typename T>
+constexpr auto make_arcus_tangens(tangens<T> x) noexcept {
+  return x.arg;
+}
+template <typename T>
+struct arcus_tangens : function_expression<arcus_tangens<T>> {
+  using function_expression<arcus_tangens>::derive;
+  friend struct function_expression<arcus_tangens<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit arcus_tangens(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::atan(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_division(unity{},
+                         make_addition(unity{}, make_multiplication(arg, arg)));
+  }
+};
+template <typename T>
+constexpr auto atan(T x) noexcept {
+  return make_arcus_tangens(x);
 }
 
 template <typename L, typename R,
@@ -817,6 +926,9 @@ constexpr auto operator""_c() noexcept {
 using detail::constant;
 using detail::variable;
 
+using detail::acos;
+using detail::asin;
+using detail::atan;
 using detail::cos;
 using detail::cosh;
 using detail::exp;
