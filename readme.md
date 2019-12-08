@@ -31,6 +31,9 @@ It is also possible to use the functions
 * `ad::sqrt`
 * `ad::tan`
 * `ad::log`
+* `ad::sinh`
+* `ad::cosh`
+* `ad::tanh`
 
 ### Multidimensional
 

@@ -34,6 +34,12 @@ template <typename T>
 struct cosinus;
 template <typename T>
 struct tangens;
+template <typename T>
+struct sinus_hyperbolicus;
+template <typename T>
+struct cosinus_hyperbolicus;
+template <typename T>
+struct tangens_hyperbolicus;
 
 template <typename T>
 struct is_constant : std::false_type {};
@@ -353,6 +359,82 @@ private:
 template <typename T>
 constexpr auto tan(T x) noexcept {
   return make_tangens(x);
+}
+
+template <typename T>
+constexpr auto make_sinus_hyperbolicus(T x) noexcept {
+  return sinus_hyperbolicus<T>(x);
+}
+template <typename T>
+struct sinus_hyperbolicus : function_expression<sinus_hyperbolicus<T>> {
+  using function_expression<sinus_hyperbolicus>::derive;
+  friend struct function_expression<sinus_hyperbolicus<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit sinus_hyperbolicus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::sinh(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_cosinus_hyperbolicus(arg);
+  }
+};
+template <typename T>
+constexpr auto sinh(T x) noexcept {
+  return make_sinus_hyperbolicus(x);
+}
+
+template <typename T>
+constexpr auto make_cosinus_hyperbolicus(T x) noexcept {
+  return cosinus_hyperbolicus<T>(x);
+}
+template <typename T>
+struct cosinus_hyperbolicus : function_expression<cosinus_hyperbolicus<T>> {
+  using function_expression<cosinus_hyperbolicus>::derive;
+  friend struct function_expression<cosinus_hyperbolicus<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit cosinus_hyperbolicus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::cosh(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_sinus_hyperbolicus(arg);
+  }
+};
+template <typename T>
+constexpr auto cosh(T x) noexcept {
+  return make_cosinus_hyperbolicus(x);
+}
+
+template <typename T>
+constexpr auto make_tangens_hyperbolicus(T x) noexcept {
+  return tangens_hyperbolicus<T>(x);
+}
+
+template <typename T>
+struct tanges_hyperbolicus : function_expression<tanges_hyperbolicus<T>> {
+  using function_expression<tanges_hyperbolicus>::derive;
+  friend struct function_expression<tanges_hyperbolicus<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit tanges_hyperbolicus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::tanh(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_subtraction(unity{}, make_multiplication(*this, *this));
+  }
+};
+template <typename T>
+constexpr auto tanh(T x) noexcept {
+  return make_tangens_hyperbolicus(x);
 }
 
 template <typename L, typename R,
@@ -736,12 +818,15 @@ using detail::constant;
 using detail::variable;
 
 using detail::cos;
+using detail::cosh;
 using detail::exp;
 using detail::log;
 using detail::pow;
 using detail::sin;
+using detail::sinh;
 using detail::sqrt;
 using detail::tan;
+using detail::tanh;
 
 inline namespace vars {
 inline constexpr variable<0> _0;
