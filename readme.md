@@ -37,6 +37,9 @@ It is also possible to use the functions
 * `ad::asin`
 * `ad::acos`
 * `ad::atan`
+* `ad::asinh`
+* `ad::acosh`
+* `ad::atanh`
 
 ### Multidimensional
 

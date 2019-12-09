@@ -46,6 +46,12 @@ template <typename T>
 struct arcus_cosinus;
 template <typename T>
 struct arcus_tangens;
+template <typename T>
+struct area_sinus_hyperbolicus;
+template <typename T>
+struct area_cosinus_hyperbolicus;
+template <typename T>
+struct area_tangens_hyperbolicus;
 
 template <typename T>
 struct is_constant : std::false_type {};
@@ -385,6 +391,10 @@ constexpr auto make_sinus_hyperbolicus(T x) noexcept {
   return sinus_hyperbolicus<T>(x);
 }
 template <typename T>
+constexpr auto make_sinus_hyperbolicus(area_sinus_hyperbolicus<T> x) noexcept {
+  return x.arg;
+}
+template <typename T>
 struct sinus_hyperbolicus : function_expression<sinus_hyperbolicus<T>> {
   using function_expression<sinus_hyperbolicus>::derive;
   friend struct function_expression<sinus_hyperbolicus<T>>;
@@ -410,6 +420,11 @@ constexpr auto make_cosinus_hyperbolicus(T x) noexcept {
   return cosinus_hyperbolicus<T>(x);
 }
 template <typename T>
+constexpr auto
+make_cosinus_hyperbolicus(area_cosinus_hyperbolicus<T> x) noexcept {
+  return x.arg;
+}
+template <typename T>
 struct cosinus_hyperbolicus : function_expression<cosinus_hyperbolicus<T>> {
   using function_expression<cosinus_hyperbolicus>::derive;
   friend struct function_expression<cosinus_hyperbolicus<T>>;
@@ -433,6 +448,11 @@ constexpr auto cosh(T x) noexcept {
 template <typename T>
 constexpr auto make_tangens_hyperbolicus(T x) noexcept {
   return tangens_hyperbolicus<T>(x);
+}
+template <typename T>
+constexpr auto
+make_tangens_hyperbolicus(area_tangens_hyperbolicus<T> x) noexcept {
+  return x.arg;
 }
 
 template <typename T>
@@ -545,6 +565,102 @@ private:
 template <typename T>
 constexpr auto atan(T x) noexcept {
   return make_arcus_tangens(x);
+}
+
+template <typename T>
+constexpr auto make_area_sinus_hyperbolicus(T x) noexcept {
+  return area_sinus_hyperbolicus<T>(x);
+}
+template <typename T>
+constexpr auto make_area_sinus_hyperbolicus(sinus_hyperbolicus<T> x) noexcept {
+  return x.arg;
+}
+template <typename T>
+struct area_sinus_hyperbolicus
+    : function_expression<area_sinus_hyperbolicus<T>> {
+  using function_expression<area_sinus_hyperbolicus>::derive;
+  friend struct function_expression<area_sinus_hyperbolicus<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit area_sinus_hyperbolicus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::asinh(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_division(unity{}, make_square_root(make_addition(
+                                      unity{}, make_multiplication(arg, arg))));
+  }
+};
+template <typename T>
+constexpr auto asinh(T x) noexcept {
+  return make_area_sinus_hyperbolicus(x);
+}
+template <typename T>
+constexpr auto make_area_cosinus_hyperbolicus(T x) noexcept {
+  return area_cosinus_hyperbolicus<T>(x);
+}
+template <typename T>
+constexpr auto
+make_area_cosinus_hyperbolicus(cosinus_hyperbolicus<T> x) noexcept {
+  return x.arg;
+}
+
+template <typename T>
+struct area_cosinus_hyperbolicus
+    : function_expression<area_cosinus_hyperbolicus<T>> {
+  using function_expression<area_cosinus_hyperbolicus>::derive;
+  friend struct function_expression<area_cosinus_hyperbolicus<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit area_cosinus_hyperbolicus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::acosh(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_division(
+        unity{},
+        make_multiplication(make_square_root(make_subtraction(arg, unity{})),
+                            make_square_root(make_addition(unity{}, arg))));
+  }
+};
+template <typename T>
+constexpr auto acosh(T x) noexcept {
+  return make_area_cosinus_hyperbolicus(x);
+}
+template <typename T>
+constexpr auto make_area_tangens_hyperbolicus(T x) noexcept {
+  return area_tangens_hyperbolicus<T>(x);
+}
+template <typename T>
+constexpr auto
+make_area_tangens_hyperbolicus(tangens_hyperbolicus<T> x) noexcept {
+  return x.arg;
+}
+template <typename T>
+struct area_tangens_hyperbolicus
+    : function_expression<area_tangens_hyperbolicus<T>> {
+  using function_expression<area_tangens_hyperbolicus>::derive;
+  friend struct function_expression<area_tangens_hyperbolicus<T>>;
+  [[no_unique_address]] T arg;
+  constexpr explicit area_tangens_hyperbolicus(T x) noexcept : arg(x) {}
+  template <typename... Ts>
+  constexpr double operator()(Ts... xs) const noexcept {
+    return std::atanh(arg(xs...));
+  }
+
+private:
+  constexpr auto derive_outer() const noexcept {
+    return make_division(
+        unity{}, make_subtraction(unity{}, make_multiplication(arg, arg)));
+  }
+};
+template <typename T>
+constexpr auto atanh(T x) noexcept {
+  return make_area_tangens_hyperbolicus(x);
 }
 
 template <typename L, typename R,
@@ -928,8 +1044,11 @@ using detail::constant;
 using detail::variable;
 
 using detail::acos;
+using detail::acosh;
 using detail::asin;
+using detail::asinh;
 using detail::atan;
+using detail::atanh;
 using detail::cos;
 using detail::cosh;
 using detail::exp;
