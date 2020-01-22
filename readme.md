@@ -1,6 +1,7 @@
 # AD: Automatic differentiation
 
-This library allows you to take the exact derivative of any function at compile time.
+This library allows you to take the exact derivative of any function at compile
+time.
 
 ## Examples
 
