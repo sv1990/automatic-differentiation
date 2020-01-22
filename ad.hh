@@ -10,7 +10,7 @@ namespace ad {
 namespace detail {
 template <std::size_t N>
 struct variable;
-struct constant;
+struct runtime_constant;
 template <typename L, typename R>
 struct addition;
 template <typename L, typename R>
@@ -108,8 +108,8 @@ inline constexpr bool is_expression_v =
     std::is_base_of_v<function_expression<T>, T>;
 
 template <long N>
-struct integral_constant : expression_base<integral_constant<N>> {
-  using expression_base<integral_constant<N>>::derive;
+struct static_constant : expression_base<static_constant<N>> {
+  using expression_base<static_constant<N>>::derive;
   constexpr double value() const noexcept { return static_cast<double>(N); }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
@@ -117,29 +117,29 @@ struct integral_constant : expression_base<integral_constant<N>> {
   }
   template <std::size_t = 0>
   constexpr auto derive() const noexcept {
-    return integral_constant<0>{};
+    return static_constant<0>{};
   }
 };
 
 template <long N>
-struct is_constant<integral_constant<N>> : std::true_type {};
+struct is_constant<static_constant<N>> : std::true_type {};
 
 template <typename T>
-struct is_integral_constant : std::false_type {};
+struct is_static_constant : std::false_type {};
 
 template <long N>
-struct is_integral_constant<integral_constant<N>> : std::true_type {};
+struct is_static_constant<static_constant<N>> : std::true_type {};
 
 template <typename T>
-inline constexpr bool is_integral_constant_v = is_integral_constant<T>::value;
+inline constexpr bool is_static_constant_v = is_static_constant<T>::value;
 
-using zero  = integral_constant<0>;
-using unity = integral_constant<1>;
+using zero  = static_constant<0>;
+using unity = static_constant<1>;
 
-struct constant : expression_base<constant> {
-  using expression_base<constant>::derive;
+struct runtime_constant : expression_base<runtime_constant> {
+  using expression_base<runtime_constant>::derive;
   double _value;
-  constexpr explicit constant(double value) noexcept : _value(value) {}
+  constexpr explicit runtime_constant(double value) noexcept : _value(value) {}
   constexpr double value() const noexcept { return _value; }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
@@ -152,7 +152,7 @@ struct constant : expression_base<constant> {
 };
 
 template <>
-struct is_constant<constant> : std::true_type {};
+struct is_constant<runtime_constant> : std::true_type {};
 
 template <typename...>
 inline constexpr bool dependent_false = false;
@@ -163,7 +163,7 @@ constexpr auto as_expression(T x) noexcept {
     return x;
   }
   else if constexpr (std::is_arithmetic_v<T>) {
-    return constant{static_cast<double>(x)};
+    return runtime_constant{static_cast<double>(x)};
   }
   else {
     static_assert(dependent_false<T>,
@@ -251,7 +251,7 @@ struct square_root : function_expression<square_root<T>> {
 private:
   constexpr auto derive_outer() const noexcept {
     return make_division(unity{},
-                         make_multiplication(integral_constant<2>{}, *this));
+                         make_multiplication(static_constant<2>{}, *this));
   }
 };
 
@@ -669,24 +669,24 @@ constexpr addition<L, R> make_addition(L l, R r) noexcept {
 
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
-                           (!is_integral_constant_v<L> ||
-                            !is_integral_constant_v<R>)>* = nullptr>
-constexpr constant make_addition(L l, R r) noexcept {
-  return constant{l.value() + r.value()};
+                           (!is_static_constant_v<L> ||
+                            !is_static_constant_v<R>)>* = nullptr>
+constexpr runtime_constant make_addition(L l, R r) noexcept {
+  return runtime_constant{l.value() + r.value()};
 }
 
 template <long N1, long N2>
-constexpr auto make_addition(integral_constant<N1>,
-                             integral_constant<N2>) noexcept {
-  return integral_constant<N1 + N2>{};
+constexpr auto make_addition(static_constant<N1>,
+                             static_constant<N2>) noexcept {
+  return static_constant<N1 + N2>{};
 }
 
-template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
 constexpr auto make_addition(zero, T x) noexcept {
   return x;
 }
 
-template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
 constexpr auto make_addition(T x, zero) noexcept {
   return x;
 }
@@ -720,24 +720,24 @@ constexpr subtraction<L, R> make_subtraction(L l, R r) noexcept {
 
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
-                           (!is_integral_constant_v<L> ||
-                            !is_integral_constant_v<R>)>* = nullptr>
-constexpr constant make_subtraction(L l, R r) noexcept {
-  return constant{l.value() - r.value()};
+                           (!is_static_constant_v<L> ||
+                            !is_static_constant_v<R>)>* = nullptr>
+constexpr runtime_constant make_subtraction(L l, R r) noexcept {
+  return runtime_constant{l.value() - r.value()};
 }
 
 template <long N1, long N2>
-constexpr auto make_subtraction(integral_constant<N1>,
-                                integral_constant<N2>) noexcept {
-  return integral_constant<N1 - N2>{};
+constexpr auto make_subtraction(static_constant<N1>,
+                                static_constant<N2>) noexcept {
+  return static_constant<N1 - N2>{};
 }
 
-template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
 constexpr auto make_subtraction(T x, zero) noexcept {
   return x;
 }
 
-template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
 constexpr auto make_subtraction(zero, T x) noexcept {
   return make_negation(x);
 }
@@ -788,34 +788,34 @@ constexpr multiplication<L, R> make_multiplication(L l, R r) noexcept {
 
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
-                           (!is_integral_constant_v<L> ||
-                            !is_integral_constant_v<R>)>* = nullptr>
-constexpr constant make_multiplication(L l, R r) noexcept {
-  return constant{l.value() * r.value()};
+                           (!is_static_constant_v<L> ||
+                            !is_static_constant_v<R>)>* = nullptr>
+constexpr runtime_constant make_multiplication(L l, R r) noexcept {
+  return runtime_constant{l.value() * r.value()};
 }
 
 template <long N1, long N2>
-constexpr auto make_multiplication(integral_constant<N1>,
-                                   integral_constant<N2>) noexcept {
-  return integral_constant<N1 * N2>{};
+constexpr auto make_multiplication(static_constant<N1>,
+                                   static_constant<N2>) noexcept {
+  return static_constant<N1 * N2>{};
 }
 
-template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
 constexpr zero make_multiplication(T, zero) noexcept {
   return zero{};
 }
 
-template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
 constexpr zero make_multiplication(zero, T) noexcept {
   return zero{};
 }
 
-template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
 constexpr T make_multiplication(T x, unity) noexcept {
   return x;
 }
 
-template <typename T, std::enable_if_t<!is_integral_constant_v<T>>* = nullptr>
+template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
 constexpr T make_multiplication(unity, T x) noexcept {
   return x;
 }
@@ -857,8 +857,8 @@ constexpr division<L, R> make_division(L l, R r) noexcept {
 // TODO: Overload for integral_constant?
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
-constexpr constant make_division(L l, R r) noexcept {
-  return constant{l.value() / r.value()};
+constexpr runtime_constant make_division(L l, R r) noexcept {
+  return runtime_constant{l.value() / r.value()};
 }
 
 template <typename R>
@@ -1028,17 +1028,18 @@ constexpr long parse_integral(const char* s, std::ptrdiff_t n) noexcept {
 
 inline namespace literals {
 constexpr auto operator""_c(long double x) noexcept {
-  return detail::constant{static_cast<double>(x)};
+  return detail::runtime_constant{static_cast<double>(x)};
 }
 
 template <char... cs>
 constexpr auto operator""_c() noexcept {
   constexpr const char s[] = {cs...};
-  return detail::integral_constant<detail::parse_integral(s, sizeof...(cs))>{};
+  return detail::static_constant<detail::parse_integral(s, sizeof...(cs))>{};
 }
 } // namespace literals
 
-using detail::constant;
+using detail::runtime_constant;
+using detail::static_constant;
 using detail::variable;
 
 using detail::acos;
