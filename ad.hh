@@ -1,6 +1,7 @@
 #ifndef AUTOMATICDIFFERENTIATION_AD_HH_1574234361739842350_
 #define AUTOMATICDIFFERENTIATION_AD_HH_1574234361739842350_
 
+#include <tuple>
 #include <type_traits>
 
 #include <cmath>
@@ -170,18 +171,15 @@ constexpr auto as_expression(T x) noexcept {
   }
 }
 
-template <std::size_t I, typename T, typename... Ts>
-constexpr auto get([[maybe_unused]] T x, Ts... xs) noexcept {
-  if constexpr (I >= sizeof...(Ts) + 1) {
+template <std::size_t I, typename... Ts>
+constexpr auto get(Ts... xs) noexcept {
+  if constexpr (I >= sizeof...(Ts)) {
     static_assert(dependent_false<Ts...>,
                   "Too few arguments passed! Maybe you meant to use ad::_0 "
                   "instead of ad::_1.");
   }
-  else if constexpr (I == 0) {
-    return x;
-  }
   else {
-    return get<I - 1>(xs...);
+    return std::get<I>(std::make_tuple(xs...));
   }
 }
 
