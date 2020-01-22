@@ -854,7 +854,7 @@ constexpr division<L, R> make_division(L l, R r) noexcept {
   return division<L, R>(l, r);
 }
 
-// TODO: Overload for integral_constant?
+// TODO: Overload for static_constant?
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr runtime_constant make_division(L l, R r) noexcept {
