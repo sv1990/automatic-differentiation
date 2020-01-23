@@ -663,7 +663,7 @@ constexpr auto atanh(T x) noexcept {
 
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
-constexpr addition<L, R> make_addition(L l, R r) noexcept {
+constexpr auto make_addition(L l, R r) noexcept {
   return addition<L, R>(l, r);
 }
 
@@ -671,7 +671,7 @@ template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
                            (!is_static_constant_v<L> ||
                             !is_static_constant_v<R>)>* = nullptr>
-constexpr runtime_constant make_addition(L l, R r) noexcept {
+constexpr auto make_addition(L l, R r) noexcept {
   return runtime_constant{l.value() + r.value()};
 }
 
@@ -714,7 +714,7 @@ struct addition : expression_base<addition<L, R>> {
 
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
-constexpr subtraction<L, R> make_subtraction(L l, R r) noexcept {
+constexpr auto make_subtraction(L l, R r) noexcept {
   return subtraction<L, R>(l, r);
 }
 
@@ -722,7 +722,7 @@ template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
                            (!is_static_constant_v<L> ||
                             !is_static_constant_v<R>)>* = nullptr>
-constexpr runtime_constant make_subtraction(L l, R r) noexcept {
+constexpr auto make_subtraction(L l, R r) noexcept {
   return runtime_constant{l.value() - r.value()};
 }
 
@@ -782,7 +782,7 @@ struct multiplication : expression_base<multiplication<L, R>> {
 
 template <typename L, typename R,
           std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
-constexpr multiplication<L, R> make_multiplication(L l, R r) noexcept {
+constexpr auto make_multiplication(L l, R r) noexcept {
   return multiplication<L, R>(l, r);
 }
 
@@ -790,7 +790,7 @@ template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
                            (!is_static_constant_v<L> ||
                             !is_static_constant_v<R>)>* = nullptr>
-constexpr runtime_constant make_multiplication(L l, R r) noexcept {
+constexpr auto make_multiplication(L l, R r) noexcept {
   return runtime_constant{l.value() * r.value()};
 }
 
@@ -801,22 +801,22 @@ constexpr auto make_multiplication(static_constant<N1>,
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr zero make_multiplication(T, zero) noexcept {
+constexpr auto make_multiplication(T, zero) noexcept {
   return zero{};
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr zero make_multiplication(zero, T) noexcept {
+constexpr auto make_multiplication(zero, T) noexcept {
   return zero{};
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr T make_multiplication(T x, unity) noexcept {
+constexpr auto make_multiplication(T x, unity) noexcept {
   return x;
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr T make_multiplication(unity, T x) noexcept {
+constexpr auto make_multiplication(unity, T x) noexcept {
   return x;
 }
 
@@ -850,24 +850,24 @@ constexpr auto operator*(L l, R r) noexcept {
 
 template <typename L, typename R,
           std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
-constexpr division<L, R> make_division(L l, R r) noexcept {
+constexpr auto make_division(L l, R r) noexcept {
   return division<L, R>(l, r);
 }
 
 // TODO: Overload for static_constant?
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
-constexpr runtime_constant make_division(L l, R r) noexcept {
+constexpr auto make_division(L l, R r) noexcept {
   return runtime_constant{l.value() / r.value()};
 }
 
 template <typename R>
-constexpr zero make_division(zero, R) noexcept {
+constexpr auto make_division(zero, R) noexcept {
   return zero{};
 }
 
 template <typename L>
-constexpr L make_division(L l, unity) noexcept {
+constexpr auto make_division(L l, unity) noexcept {
   return l;
 }
 
