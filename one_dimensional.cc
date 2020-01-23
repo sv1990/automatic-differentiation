@@ -11,6 +11,8 @@ int main() {
   const auto df  = f.derive();
   const auto d2f = df.derive();
 
+  static_assert(
+      std::is_same_v<std::decay_t<decltype(123_c)>, ad::static_constant<123>>);
   static_assert(sizeof(f) < sizeof((x + 1) * (x - 1)));
   static_assert(
       std::is_same_v<std::decay_t<decltype(d2f)>, std::decay_t<decltype(2_c)>>);
