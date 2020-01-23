@@ -92,8 +92,8 @@ struct expression_base {
 };
 
 template <typename Derived>
-struct function_expression : expression_base<function_expression<Derived>> {
-  using expression_base<function_expression<Derived>>::derive;
+struct unary_function : expression_base<unary_function<Derived>> {
+  using expression_base<unary_function<Derived>>::derive;
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     const Derived& derived = static_cast<const Derived&>(*this);
@@ -105,7 +105,7 @@ struct function_expression : expression_base<function_expression<Derived>> {
 template <typename T>
 inline constexpr bool is_expression_v =
     std::is_base_of_v<expression_base<T>, T> ||
-    std::is_base_of_v<function_expression<T>, T>;
+    std::is_base_of_v<unary_function<T>, T>;
 
 template <long N>
 struct static_constant : expression_base<static_constant<N>> {
@@ -213,9 +213,9 @@ constexpr auto make_exponential(logarithm<T> x) noexcept {
 }
 
 template <typename T>
-struct exponential : function_expression<exponential<T>> {
-  using function_expression<exponential>::derive;
-  friend struct function_expression<exponential<T>>;
+struct exponential : unary_function<exponential<T>> {
+  using unary_function<exponential>::derive;
+  friend struct unary_function<exponential<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit exponential(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -238,9 +238,9 @@ constexpr auto make_square_root(T x) noexcept {
 }
 
 template <typename T>
-struct square_root : function_expression<square_root<T>> {
-  using function_expression<square_root>::derive;
-  friend struct function_expression<square_root<T>>;
+struct square_root : unary_function<square_root<T>> {
+  using unary_function<square_root>::derive;
+  friend struct unary_function<square_root<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit square_root(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -271,9 +271,9 @@ constexpr auto make_logarithm(exponential<T> x) noexcept {
 }
 
 template <typename T>
-struct logarithm : function_expression<logarithm<T>> {
-  using function_expression<logarithm>::derive;
-  friend struct function_expression<logarithm<T>>;
+struct logarithm : unary_function<logarithm<T>> {
+  using unary_function<logarithm>::derive;
+  friend struct unary_function<logarithm<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit logarithm(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -302,9 +302,9 @@ constexpr auto make_sinus(arcus_sinus<T> x) noexcept {
 }
 
 template <typename T>
-struct sinus : function_expression<sinus<T>> {
-  using function_expression<sinus>::derive;
-  friend struct function_expression<sinus<T>>;
+struct sinus : unary_function<sinus<T>> {
+  using unary_function<sinus>::derive;
+  friend struct unary_function<sinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit sinus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -332,9 +332,9 @@ constexpr auto make_cosinus(arcus_cosinus<T> x) noexcept {
 }
 
 template <typename T>
-struct cosinus : function_expression<cosinus<T>> {
-  using function_expression<cosinus>::derive;
-  friend struct function_expression<cosinus<T>>;
+struct cosinus : unary_function<cosinus<T>> {
+  using unary_function<cosinus>::derive;
+  friend struct unary_function<cosinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit cosinus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -363,9 +363,9 @@ constexpr auto make_tangens(arcus_tangens<T> x) noexcept {
 }
 
 template <typename T>
-struct tangens : function_expression<tangens<T>> {
-  using function_expression<tangens>::derive;
-  friend struct function_expression<tangens<T>>;
+struct tangens : unary_function<tangens<T>> {
+  using unary_function<tangens>::derive;
+  friend struct unary_function<tangens<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit tangens(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -393,9 +393,9 @@ constexpr auto make_sinus_hyperbolicus(area_sinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
-struct sinus_hyperbolicus : function_expression<sinus_hyperbolicus<T>> {
-  using function_expression<sinus_hyperbolicus>::derive;
-  friend struct function_expression<sinus_hyperbolicus<T>>;
+struct sinus_hyperbolicus : unary_function<sinus_hyperbolicus<T>> {
+  using unary_function<sinus_hyperbolicus>::derive;
+  friend struct unary_function<sinus_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit sinus_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -423,9 +423,9 @@ make_cosinus_hyperbolicus(area_cosinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
-struct cosinus_hyperbolicus : function_expression<cosinus_hyperbolicus<T>> {
-  using function_expression<cosinus_hyperbolicus>::derive;
-  friend struct function_expression<cosinus_hyperbolicus<T>>;
+struct cosinus_hyperbolicus : unary_function<cosinus_hyperbolicus<T>> {
+  using unary_function<cosinus_hyperbolicus>::derive;
+  friend struct unary_function<cosinus_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit cosinus_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -454,9 +454,9 @@ make_tangens_hyperbolicus(area_tangens_hyperbolicus<T> x) noexcept {
 }
 
 template <typename T>
-struct tanges_hyperbolicus : function_expression<tanges_hyperbolicus<T>> {
-  using function_expression<tanges_hyperbolicus>::derive;
-  friend struct function_expression<tanges_hyperbolicus<T>>;
+struct tanges_hyperbolicus : unary_function<tanges_hyperbolicus<T>> {
+  using unary_function<tanges_hyperbolicus>::derive;
+  friend struct unary_function<tanges_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit tanges_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -483,9 +483,9 @@ constexpr auto make_arcus_sinus(sinus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
-struct arcus_sinus : function_expression<arcus_sinus<T>> {
-  using function_expression<arcus_sinus>::derive;
-  friend struct function_expression<arcus_sinus<T>>;
+struct arcus_sinus : unary_function<arcus_sinus<T>> {
+  using unary_function<arcus_sinus>::derive;
+  friend struct unary_function<arcus_sinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit arcus_sinus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -513,9 +513,9 @@ constexpr auto make_arcus_cosinus(cosinus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
-struct arcus_cosinus : function_expression<arcus_cosinus<T>> {
-  using function_expression<arcus_cosinus>::derive;
-  friend struct function_expression<arcus_cosinus<T>>;
+struct arcus_cosinus : unary_function<arcus_cosinus<T>> {
+  using unary_function<arcus_cosinus>::derive;
+  friend struct unary_function<arcus_cosinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit arcus_cosinus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -544,9 +544,9 @@ constexpr auto make_arcus_tangens(tangens<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
-struct arcus_tangens : function_expression<arcus_tangens<T>> {
-  using function_expression<arcus_tangens>::derive;
-  friend struct function_expression<arcus_tangens<T>>;
+struct arcus_tangens : unary_function<arcus_tangens<T>> {
+  using unary_function<arcus_tangens>::derive;
+  friend struct unary_function<arcus_tangens<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit arcus_tangens(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -574,10 +574,9 @@ constexpr auto make_area_sinus_hyperbolicus(sinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
-struct area_sinus_hyperbolicus
-    : function_expression<area_sinus_hyperbolicus<T>> {
-  using function_expression<area_sinus_hyperbolicus>::derive;
-  friend struct function_expression<area_sinus_hyperbolicus<T>>;
+struct area_sinus_hyperbolicus : unary_function<area_sinus_hyperbolicus<T>> {
+  using unary_function<area_sinus_hyperbolicus>::derive;
+  friend struct unary_function<area_sinus_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit area_sinus_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -607,9 +606,9 @@ make_area_cosinus_hyperbolicus(cosinus_hyperbolicus<T> x) noexcept {
 
 template <typename T>
 struct area_cosinus_hyperbolicus
-    : function_expression<area_cosinus_hyperbolicus<T>> {
-  using function_expression<area_cosinus_hyperbolicus>::derive;
-  friend struct function_expression<area_cosinus_hyperbolicus<T>>;
+    : unary_function<area_cosinus_hyperbolicus<T>> {
+  using unary_function<area_cosinus_hyperbolicus>::derive;
+  friend struct unary_function<area_cosinus_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit area_cosinus_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts>
@@ -640,9 +639,9 @@ make_area_tangens_hyperbolicus(tangens_hyperbolicus<T> x) noexcept {
 }
 template <typename T>
 struct area_tangens_hyperbolicus
-    : function_expression<area_tangens_hyperbolicus<T>> {
-  using function_expression<area_tangens_hyperbolicus>::derive;
-  friend struct function_expression<area_tangens_hyperbolicus<T>>;
+    : unary_function<area_tangens_hyperbolicus<T>> {
+  using unary_function<area_tangens_hyperbolicus>::derive;
+  friend struct unary_function<area_tangens_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit area_tangens_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts>
