@@ -71,16 +71,10 @@ inline constexpr bool is_variable_v = is_variable<T>::value;
 
 template <typename Derived>
 struct expression_base {
-#ifdef __clang__
-  template <typename T, std::enable_if_t<is_variable_v<T>>* = nullptr>
-  constexpr auto derive(T) const noexcept {
-    return static_cast<const Derived&>(*this).template derive<T::value>();
-  }
-#else
   template <typename... Ts,
             std::enable_if_t<(is_variable_v<Ts> && ...)>* = nullptr>
   constexpr auto derive(Ts...) const noexcept {
-    return static_cast<const Derived&>(*this).template derive<Ts::value...>();
+    return derive<Ts::value...>();
   }
   template <std::size_t I, std::size_t... Is>
   constexpr auto derive() const noexcept {
@@ -88,7 +82,6 @@ struct expression_base {
         .template derive<I>()
         .template derive<Is...>();
   }
-#endif
 };
 
 template <typename Derived>
