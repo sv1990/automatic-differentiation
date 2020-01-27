@@ -72,7 +72,7 @@ inline constexpr bool is_variable_v = is_variable<T>::value;
 template <typename Derived>
 struct expression_base {
   template <typename... Ts,
-            std::enable_if_t<(is_variable_v<Ts> && ...)>* = nullptr>
+            std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
   constexpr auto derive(Ts...) const noexcept {
     return derive<Ts::value...>();
   }
