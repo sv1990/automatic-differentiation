@@ -1,7 +1,5 @@
 #include "ad.hh"
 
-#include <show/all.hh>
-
 template <typename T, typename U>
 constexpr bool same_type(T, U) noexcept {
   return std::is_same_v<T, U>;
