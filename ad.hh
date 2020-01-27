@@ -693,7 +693,7 @@ struct addition : expression_base<addition<L, R>> {
   using expression_base<addition>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
-  constexpr addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
+  constexpr explicit addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) + rhs(xs...);
@@ -744,7 +744,8 @@ struct subtraction : expression_base<subtraction<L, R>> {
   using expression_base<subtraction>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
-  constexpr subtraction(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
+  constexpr explicit subtraction(L lhs_, R rhs_) noexcept
+      : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) - rhs(xs...);
@@ -760,7 +761,8 @@ struct multiplication : expression_base<multiplication<L, R>> {
   using expression_base<multiplication>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
-  constexpr multiplication(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
+  constexpr explicit multiplication(L lhs_, R rhs_) noexcept
+      : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) * rhs(xs...);
@@ -888,7 +890,7 @@ struct division : expression_base<division<L, R>> {
   using expression_base<division>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
-  constexpr division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
+  constexpr explicit division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) / rhs(xs...);
@@ -946,7 +948,7 @@ struct power : expression_base<power<L, R>> {
   using expression_base<power>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
-  constexpr power(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
+  constexpr explicit power(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::pow(lhs(xs...), rhs(xs...));
