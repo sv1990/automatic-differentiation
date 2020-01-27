@@ -56,7 +56,7 @@ constexpr auto f = x * x * y;
 constexpr auto dxf = f.derive(x);
 constexpr auto dyf = f.derive(y); // Alternatively f.derive<1>()
 
-// Take the mixed sedond derivative (Syntax works only with gcc)
+// Take the mixed sedond derivative
 constexpr auto dxyf = f.derive(x, y);
 ```
 
