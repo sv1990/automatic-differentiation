@@ -19,4 +19,17 @@ int main() {
 
   static_assert(same_type(x.derive(x, x), 0_c));
   static_assert(same_type((x * y).derive(x, y), 1_c));
+
+  static_assert(same_type(ad::log(x).derive(x), 1_c / x));
+  static_assert(same_type(ad::exp(x).derive(x), ad::exp(x)));
+
+  static_assert(same_type(ad::sin(x).derive(x), ad::cos(x)));
+  static_assert(same_type(ad::sin(x).derive(x, x), -ad::sin(x)));
+  static_assert(same_type(ad::sin(x).derive(x, x, x), -ad::cos(x)));
+  static_assert(same_type(ad::sin(x).derive(x, x, x, x), ad::sin(x)));
+
+  static_assert(same_type(ad::exp(ad::sin(x)).derive(x),
+                          ad::cos(x) * ad::exp(ad::sin(x))));
+  static_assert(same_type((ad::exp(x) * ad::sin(x)).derive(x),
+                          ad::exp(x) * ad::sin(x) + ad::exp(x) * ad::cos(x)));
 }
