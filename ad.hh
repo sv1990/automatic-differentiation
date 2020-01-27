@@ -86,7 +86,7 @@ struct expression_base {
 
 template <typename Derived>
 struct unary_function : expression_base<unary_function<Derived>> {
-  using expression_base<unary_function<Derived>>::derive;
+  using expression_base<unary_function>::derive;
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     const Derived& derived = static_cast<const Derived&>(*this);
@@ -102,7 +102,7 @@ inline constexpr bool is_expression_v =
 
 template <long N>
 struct static_constant : expression_base<static_constant<N>> {
-  using expression_base<static_constant<N>>::derive;
+  using expression_base<static_constant>::derive;
   constexpr double value() const noexcept { return static_cast<double>(N); }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
