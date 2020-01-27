@@ -16,4 +16,7 @@ int main() {
   static_assert(same_type(x.derive(y), 0_c));
   static_assert(same_type(y.derive(x), 0_c));
   static_assert(same_type(y.derive(y), 1_c));
+
+  static_assert(same_type(x.derive(x, x), 0_c));
+  static_assert(same_type((x * y).derive(x, y), 1_c));
 }
