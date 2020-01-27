@@ -74,13 +74,19 @@ struct expression_base {
   template <typename... Ts,
             std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
   constexpr auto derive(Ts...) const noexcept {
-    return static_cast<const Derived&>(*this).template derive<Ts::value...>();
+    return derive<Ts::value...>();
   }
   template <std::size_t I, std::size_t... Is>
   constexpr auto derive() const noexcept {
-    return static_cast<const Derived&>(*this)
-        .template derive<I>()
-        .template derive<Is...>();
+    const Derived& derived = static_cast<const Derived&>(*this);
+    if constexpr (sizeof...(Is) > 0) {
+      return derived            //
+          .template derive<I>() //
+          .template derive<Is...>();
+    }
+    else {
+      return derived.template derive<I>();
+    }
   }
 };
 
