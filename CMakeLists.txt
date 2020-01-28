@@ -15,3 +15,7 @@ target_compile_options(multi_dimensional PRIVATE "-Wall;-Wextra;-pedantic")
 add_executable(test test.cc)
 target_compile_features(test PRIVATE cxx_std_20)
 target_compile_options(test PRIVATE "-Wall;-Wextra;-pedantic")
+
+add_executable(to_string to_string.cc)
+target_compile_features(to_string PRIVATE cxx_std_20)
+target_compile_options(to_string PRIVATE "-Wall;-Wextra;-pedantic")
