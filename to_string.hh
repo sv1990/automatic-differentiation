@@ -29,7 +29,7 @@ private:
     return concat(op, '(', to_string(x), ')');
   }
   template <typename T, typename L, typename R>
-  static std::string bin_op(std::string_view op, const T& x, const L l,
+  static std::string bin_op(std::string_view op, const T& x, const L& l,
                             const R& r) {
     const bool lhs_needs_brackets = precedence(x) > precedence(l);
     const bool rhs_needs_brackets = precedence(x) > precedence(r);
@@ -61,9 +61,7 @@ public:
   static int precedence(const power<L, R>&) {
     return 3;
   }
-  static int precedence(...) {
-    return 4;
-  }
+  static int precedence(...) { return 4; }
 
   template <typename L, typename R>
   static std::string to_string(const addition<L, R>& x) {
@@ -145,6 +143,10 @@ public:
   template <typename T>
   static std::string to_string(const square_root<T>& x) {
     return un_op("sqrt", x.arg);
+  }
+  template <typename T>
+  static std::string to_string(const negation<T>& x) {
+    return un_op("-", x.arg);
   }
 };
 } // namespace detail
