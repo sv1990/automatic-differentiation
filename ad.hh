@@ -453,11 +453,11 @@ make_tangens_hyperbolicus(area_tangens_hyperbolicus<T> x) noexcept {
 }
 
 template <typename T>
-struct tanges_hyperbolicus : unary_function<tanges_hyperbolicus<T>> {
-  using unary_function<tanges_hyperbolicus>::derive;
-  friend struct unary_function<tanges_hyperbolicus<T>>;
+struct tangens_hyperbolicus : unary_function<tangens_hyperbolicus<T>> {
+  using unary_function<tangens_hyperbolicus>::derive;
+  friend struct unary_function<tangens_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
-  constexpr explicit tanges_hyperbolicus(T x) noexcept : arg(x) {}
+  constexpr explicit tangens_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::tanh(arg(xs...));
