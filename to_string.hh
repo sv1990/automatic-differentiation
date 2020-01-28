@@ -16,7 +16,7 @@ std::string concat(const Ts&... xs) {
 struct to_string_impl {
   template <typename T, std::enable_if_t<is_constant_v<T>>* = nullptr>
   static std::string to_string(const T& x) {
-    return std::to_string(x.value());
+    return concat(x.value());
   }
   template <std::size_t N>
   static std::string to_string(const variable<N>&) {
@@ -26,33 +26,64 @@ struct to_string_impl {
 private:
   template <typename T>
   static std::string un_op(std::string_view op, const T x) {
-    return concat('(', op, ' ', to_string(x), ')');
+    return concat(op, '(', to_string(x), ')');
   }
-  template <typename L, typename R>
-  static std::string bin_op(std::string_view op, const L l, const R& r) {
-    return concat('(', op, ' ', to_string(l), ' ', to_string(r), ')');
+  template <typename T, typename L, typename R>
+  static std::string bin_op(std::string_view op, const T& x, const L l,
+                            const R& r) {
+    const bool lhs_needs_brackets = precedence(x) > precedence(l);
+    const bool rhs_needs_brackets = precedence(x) > precedence(r);
+    // clang-format off
+    return concat(lhs_needs_brackets ? "(" : "", to_string(l), lhs_needs_brackets ? ")" : "",
+                  ' ', op, ' ',
+                  rhs_needs_brackets ? "(" : "", to_string(r), rhs_needs_brackets ? ")" : "");
+    // clang-format on
   }
 
 public:
   template <typename L, typename R>
+  static int precedence(const addition<L, R>&) {
+    return 1;
+  }
+  template <typename L, typename R>
+  static int precedence(const subtraction<L, R>&) {
+    return 1;
+  }
+  template <typename L, typename R>
+  static int precedence(const multiplication<L, R>&) {
+    return 2;
+  }
+  template <typename L, typename R>
+  static int precedence(const division<L, R>&) {
+    return 2;
+  }
+  template <typename L, typename R>
+  static int precedence(const power<L, R>&) {
+    return 3;
+  }
+  static int precedence(...) {
+    return 4;
+  }
+
+  template <typename L, typename R>
   static std::string to_string(const addition<L, R>& x) {
-    return bin_op("+", x.lhs, x.rhs);
+    return bin_op("+", x, x.lhs, x.rhs);
   }
   template <typename L, typename R>
   static std::string to_string(const subtraction<L, R>& x) {
-    return bin_op("-", x.lhs, x.rhs);
+    return bin_op("-", x, x.lhs, x.rhs);
   }
   template <typename L, typename R>
   static std::string to_string(const multiplication<L, R>& x) {
-    return bin_op("*", x.lhs, x.rhs);
+    return bin_op("*", x, x.lhs, x.rhs);
   }
   template <typename L, typename R>
   static std::string to_string(const division<L, R>& x) {
-    return bin_op("/", x.lhs, x.rhs);
+    return bin_op("/", x, x.lhs, x.rhs);
   }
   template <typename L, typename R>
   static std::string to_string(const power<L, R>& x) {
-    return bin_op("^", x.lhs, x.rhs);
+    return bin_op("^", x, x.lhs, x.rhs);
   }
 
   template <typename T>
@@ -120,7 +151,6 @@ public:
 
 template <typename T, std::enable_if_t<detail::is_expression_v<T>>* = nullptr>
 std::string to_string(const T& x) {
-  // TODO: Transform to infix notation
   return detail::to_string_impl::to_string(x);
 }
 } // namespace ad
