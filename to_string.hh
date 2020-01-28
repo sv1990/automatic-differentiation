@@ -40,7 +40,6 @@ private:
     // clang-format on
   }
 
-public:
   template <typename L, typename R>
   static int precedence(const addition<L, R>&) {
     return 1;
@@ -63,6 +62,7 @@ public:
   }
   static int precedence(...) { return 4; }
 
+public:
   template <typename L, typename R>
   static std::string to_string(const addition<L, R>& x) {
     return bin_op("+", x, x.lhs, x.rhs);
