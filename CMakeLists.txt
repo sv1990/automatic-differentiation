@@ -4,22 +4,18 @@ project(AutomaticDifferentiation CXX)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-add_executable(one_dimensional one_dimensional.cc)
-target_compile_features(one_dimensional PRIVATE cxx_std_20)
-target_compile_options(one_dimensional PRIVATE "-Wall;-Wextra;-pedantic")
+add_library(ad INTERFACE)
+add_library(ad::ad ALIAS ad)
+target_compile_features(ad INTERFACE cxx_std_17)
 
-add_executable(multi_dimensional multi_dimensional.cc)
-target_compile_features(multi_dimensional PRIVATE cxx_std_20)
-target_compile_options(multi_dimensional PRIVATE "-Wall;-Wextra;-pedantic")
+target_include_directories(
+  ad
+  INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 
-add_executable(test test.cc)
-target_compile_features(test PRIVATE cxx_std_20)
-target_compile_options(test PRIVATE "-Wall;-Wextra;-pedantic")
+add_subdirectory(examples)
 
-add_executable(to_string to_string.cc)
-target_compile_features(to_string PRIVATE cxx_std_20)
-target_compile_options(to_string PRIVATE "-Wall;-Wextra;-pedantic")
-
-add_executable(error_propagation error_propagation.cc)
-target_compile_features(error_propagation PRIVATE cxx_std_20)
-target_compile_options(error_propagation PRIVATE "-Wall;-Wextra;-pedantic")
+enable_testing()
+add_subdirectory(tests)
