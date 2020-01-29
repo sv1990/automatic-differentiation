@@ -3,6 +3,13 @@
 
 #include <iostream>
 
+namespace ad {
+template <>
+struct format_variable<variable<0>> {
+  static inline std::string rep = "x";
+};
+} // namespace ad
+
 int main() {
   using namespace ad::literals;
   const auto x = ad::_0;

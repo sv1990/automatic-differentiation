@@ -13,6 +13,16 @@ std::string concat(const Ts&... xs) {
   (oss << ... << xs);
   return std::move(oss).str();
 }
+} // namespace detail
+
+template <typename T>
+struct format_variable;
+template <std::size_t N>
+struct format_variable<variable<N>> {
+  static inline std::string representation = detail::concat("x", N);
+};
+
+namespace detail {
 struct to_string_impl {
   template <typename T, std::enable_if_t<is_constant_v<T>>* = nullptr>
   static std::string to_string(const T& x) {
@@ -20,7 +30,7 @@ struct to_string_impl {
   }
   template <std::size_t N>
   static std::string to_string(const variable<N>&) {
-    return concat("x", N);
+    return format_variable<variable<N>>::rep;
   }
 
 private:
