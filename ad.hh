@@ -76,6 +76,42 @@ struct expression_base {
   constexpr auto derive(Ts...) const noexcept {
     return derive<Ts::value...>();
   }
+#if __clang__
+  // workaround for
+  // https://www.reddit.com/r/cpp_questions/comments/ev4657/possible_bug_in_clangs_template_lookup/
+  template <std::size_t I, std::size_t... Is>
+  constexpr auto derive_helper() const noexcept {
+    const Derived& derived = static_cast<const Derived&>(*this);
+    if constexpr (sizeof...(Is) == 1) {
+      return derived            //
+          .template derive<I>() //
+          .template derive<Is...>();
+    }
+    else {
+      return derived            //
+          .template derive<I>() //
+          .template derive_helper<Is...>();
+    }
+  }
+
+  template <std::size_t I, std::size_t... Is>
+  constexpr auto derive() const noexcept {
+    const Derived& derived = static_cast<const Derived&>(*this);
+    if constexpr (sizeof...(Is) == 0) {
+      return derived.template derive<I>();
+    }
+    else if constexpr (sizeof...(Is) == 1) {
+      return derived            //
+          .template derive<I>() //
+          .template derive<Is...>();
+    }
+    else {
+      return derived            //
+          .template derive<I>() //
+          .template derive_helper<Is...>();
+    }
+  }
+#else
   template <std::size_t I, std::size_t... Is>
   constexpr auto derive() const noexcept {
     const Derived& derived = static_cast<const Derived&>(*this);
@@ -88,6 +124,7 @@ struct expression_base {
       return derived.template derive<I>();
     }
   }
+#endif
 };
 
 template <typename Derived>
