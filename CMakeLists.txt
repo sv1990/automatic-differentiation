@@ -19,3 +19,7 @@ target_compile_options(test PRIVATE "-Wall;-Wextra;-pedantic")
 add_executable(to_string to_string.cc)
 target_compile_features(to_string PRIVATE cxx_std_20)
 target_compile_options(to_string PRIVATE "-Wall;-Wextra;-pedantic")
+
+add_executable(error_propagation error_propagation.cc)
+target_compile_features(error_propagation PRIVATE cxx_std_20)
+target_compile_options(error_propagation PRIVATE "-Wall;-Wextra;-pedantic")
