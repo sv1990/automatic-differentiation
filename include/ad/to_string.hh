@@ -35,18 +35,20 @@ struct to_string_impl {
 
 private:
   template <typename T>
-  static std::string un_op(std::string_view op, const T x) {
-    return concat(op, '(', to_string(x), ')');
+  static std::string format_function(std::string_view op, const T& x) {
+    return concat(op, '(', to_string(x.arg), ')');
   }
-  template <typename T, typename L, typename R>
-  static std::string bin_op(std::string_view op, const T& x, const L& l,
-                            const R& r) {
-    const bool lhs_needs_brackets = precedence(x) > precedence(l);
-    const bool rhs_needs_brackets = precedence(x) > precedence(r);
+  template <typename T>
+  static std::string format_binary_operator(std::string_view op, const T& x) {
+    const auto& lhs = x.lhs;
+    const auto& rhs = x.rhs;
+
+    const bool lhs_needs_brackets = precedence(x) > precedence(lhs);
+    const bool rhs_needs_brackets = precedence(x) > precedence(rhs);
     // clang-format off
-    return concat(lhs_needs_brackets ? "(" : "", to_string(l), lhs_needs_brackets ? ")" : "",
+    return concat(lhs_needs_brackets ? "(" : "", to_string(lhs), lhs_needs_brackets ? ")" : "",
                   ' ', op, ' ',
-                  rhs_needs_brackets ? "(" : "", to_string(r), rhs_needs_brackets ? ")" : "");
+                  rhs_needs_brackets ? "(" : "", to_string(rhs), rhs_needs_brackets ? ")" : "");
     // clang-format on
   }
 
@@ -75,88 +77,88 @@ private:
 public:
   template <typename L, typename R>
   static std::string to_string(const addition<L, R>& x) {
-    return bin_op("+", x, x.lhs, x.rhs);
+    return format_binary_operator("+", x);
   }
   template <typename L, typename R>
   static std::string to_string(const subtraction<L, R>& x) {
-    return bin_op("-", x, x.lhs, x.rhs);
+    return format_binary_operator("-", x);
   }
   template <typename L, typename R>
   static std::string to_string(const multiplication<L, R>& x) {
-    return bin_op("*", x, x.lhs, x.rhs);
+    return format_binary_operator("*", x);
   }
   template <typename L, typename R>
   static std::string to_string(const division<L, R>& x) {
-    return bin_op("/", x, x.lhs, x.rhs);
+    return format_binary_operator("/", x);
   }
   template <typename L, typename R>
   static std::string to_string(const power<L, R>& x) {
-    return bin_op("^", x, x.lhs, x.rhs);
+    return format_binary_operator("^", x);
   }
 
   template <typename T>
   static std::string to_string(const sinus<T>& x) {
-    return un_op("sin", x.arg);
+    return format_function("sin", x);
   }
   template <typename T>
   static std::string to_string(const cosinus<T>& x) {
-    return un_op("cos", x.arg);
+    return format_function("cos", x);
   }
   template <typename T>
   static std::string to_string(const tangens<T>& x) {
-    return un_op("tan", x.arg);
+    return format_function("tan", x);
   }
   template <typename T>
   static std::string to_string(const arcus_sinus<T>& x) {
-    return un_op("asin", x.arg);
+    return format_function("asin", x);
   }
   template <typename T>
   static std::string to_string(const arcus_cosinus<T>& x) {
-    return un_op("acos", x.arg);
+    return format_function("acos", x);
   }
   template <typename T>
   static std::string to_string(const arcus_tangens<T>& x) {
-    return un_op("atan", x.arg);
+    return format_function("atan", x);
   }
   template <typename T>
   static std::string to_string(const sinus_hyperbolicus<T>& x) {
-    return un_op("sinh", x.arg);
+    return format_function("sinh", x);
   }
   template <typename T>
   static std::string to_string(const cosinus_hyperbolicus<T>& x) {
-    return un_op("cosh", x.arg);
+    return format_function("cosh", x);
   }
   template <typename T>
   static std::string to_string(const tangens_hyperbolicus<T>& x) {
-    return un_op("sin", x.arg);
+    return format_function("sin", x);
   }
   template <typename T>
   static std::string to_string(const area_sinus_hyperbolicus<T>& x) {
-    return un_op("asinh", x.arg);
+    return format_function("asinh", x);
   }
   template <typename T>
   static std::string to_string(const area_cosinus_hyperbolicus<T>& x) {
-    return un_op("acosh", x.arg);
+    return format_function("acosh", x);
   }
   template <typename T>
   static std::string to_string(const area_tangens_hyperbolicus<T>& x) {
-    return un_op("atanh", x.arg);
+    return format_function("atanh", x);
   }
   template <typename T>
   static std::string to_string(const exponential<T>& x) {
-    return un_op("exp", x.arg);
+    return format_function("exp", x);
   }
   template <typename T>
   static std::string to_string(const logarithm<T>& x) {
-    return un_op("log", x.arg);
+    return format_function("log", x);
   }
   template <typename T>
   static std::string to_string(const square_root<T>& x) {
-    return un_op("sqrt", x.arg);
+    return format_function("sqrt", x);
   }
   template <typename T>
   static std::string to_string(const negation<T>& x) {
-    return un_op("-", x.arg);
+    return format_function("-", x);
   }
 };
 } // namespace detail
