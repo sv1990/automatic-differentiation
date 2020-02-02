@@ -156,9 +156,39 @@ public:
   static std::string to_string(const square_root<T>& x) {
     return format_function("sqrt", x);
   }
+
+private:
+  struct format_negate {
+    template <typename L, typename R>
+    static std::string format(const addition<L, R>& x) {
+      return concat("-(", to_string(x), ')');
+    }
+    template <typename L, typename R>
+    static std::string format(const subtraction<L, R>& x) {
+      return concat("-(", to_string(x), ')');
+    }
+    template <typename L, typename R>
+    static std::string format(const multiplication<L, R>& x) {
+      return concat("-(", to_string(x), ')');
+    }
+    template <typename L, typename R>
+    static std::string format(const division<L, R>& x) {
+      return concat("-(", to_string(x), ')');
+    }
+    template <typename L, typename R>
+    static std::string format(const power<L, R>& x) {
+      return concat("-(", to_string(x), ')');
+    }
+    template <typename T>
+    static std::string format(const T& x) {
+      return concat('-', to_string(x));
+    }
+  };
+
+public:
   template <typename T>
   static std::string to_string(const negation<T>& x) {
-    return format_function("-", x);
+    return format_negate::format(x.arg);
   }
 };
 } // namespace detail
