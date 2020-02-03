@@ -19,7 +19,7 @@ template <typename T>
 struct format_variable;
 template <std::size_t N>
 struct format_variable<variable<N>> {
-  static inline std::string representation = detail::concat("x", N);
+  static inline std::string rep = detail::concat("x", N);
 };
 
 namespace detail {
