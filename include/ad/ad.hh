@@ -1033,6 +1033,10 @@ constexpr auto make_negation(negation<T> x) noexcept {
   return x.arg;
 }
 
+constexpr auto make_negation(zero) noexcept {
+  return zero{};
+}
+
 template <typename T>
 struct negation : expression_base<negation<T>> {
   using expression_base<negation>::derive;
