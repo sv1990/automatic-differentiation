@@ -1037,6 +1037,16 @@ constexpr auto make_negation(zero) noexcept {
   return zero{};
 }
 
+template <typename L, typename R>
+constexpr auto make_negation(multiplication<L, R> x)noexcept {
+  return make_multiplication(make_negation(x.lhs), x.rhs);
+}
+
+template <typename L, typename R>
+constexpr auto make_negation(division<L, R> x)noexcept {
+  return make_division(make_negation(x.lhs), x.rhs);
+}
+
 template <typename T>
 struct negation : expression_base<negation<T>> {
   using expression_base<negation>::derive;
