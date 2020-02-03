@@ -35,4 +35,5 @@ int main() {
 
   static_assert(same_type(-(-x * 1_c), x));
   static_assert(same_type(-0_c, 0_c));
+  static_assert(same_type(ad::pow(1_c / x, -1_c), x));
 }

@@ -986,6 +986,11 @@ constexpr auto make_power(zero, zero) noexcept {
   return unity{};
 }
 
+template <typename L, typename R, typename T>
+constexpr auto make_power(division<L, R> lhs, negation<T> rhs) noexcept {
+  return make_power(make_division(lhs.rhs, lhs.lhs), rhs.arg);
+}
+
 template <typename L, typename R>
 struct power : expression_base<power<L, R>> {
   using expression_base<power>::derive;
@@ -1038,12 +1043,12 @@ constexpr auto make_negation(zero) noexcept {
 }
 
 template <typename L, typename R>
-constexpr auto make_negation(multiplication<L, R> x)noexcept {
+constexpr auto make_negation(multiplication<L, R> x) noexcept {
   return make_multiplication(make_negation(x.lhs), x.rhs);
 }
 
 template <typename L, typename R>
-constexpr auto make_negation(division<L, R> x)noexcept {
+constexpr auto make_negation(division<L, R> x) noexcept {
   return make_division(make_negation(x.lhs), x.rhs);
 }
 
