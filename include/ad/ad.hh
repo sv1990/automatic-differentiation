@@ -265,7 +265,7 @@ private:
 
 template <typename T>
 constexpr auto exp(T x) noexcept {
-  return make_exponential(x);
+  return make_exponential(as_expression(x));
 }
 
 template <typename T>
@@ -293,7 +293,7 @@ private:
 
 template <typename T>
 constexpr auto sqrt(T x) noexcept {
-  return make_square_root(x);
+  return make_square_root(as_expression(x));
 }
 
 template <typename T>
@@ -325,7 +325,7 @@ private:
 
 template <typename T>
 constexpr auto log(T x) noexcept {
-  return make_logarithm(x);
+  return make_logarithm(as_expression(x));
 }
 
 template <typename T>
@@ -354,7 +354,7 @@ private:
 
 template <typename T>
 constexpr auto sin(T x) noexcept {
-  return make_sinus(x);
+  return make_sinus(as_expression(x));
 }
 
 template <typename T>
@@ -386,7 +386,7 @@ private:
 
 template <typename T>
 constexpr auto cos(T x) noexcept {
-  return make_cosinus(x);
+  return make_cosinus(as_expression(x));
 }
 
 template <typename T>
@@ -417,7 +417,7 @@ private:
 
 template <typename T>
 constexpr auto tan(T x) noexcept {
-  return make_tangens(x);
+  return make_tangens(as_expression(x));
 }
 
 template <typename T>
@@ -446,7 +446,7 @@ private:
 };
 template <typename T>
 constexpr auto sinh(T x) noexcept {
-  return make_sinus_hyperbolicus(x);
+  return make_sinus_hyperbolicus(as_expression(x));
 }
 
 template <typename T>
@@ -476,7 +476,7 @@ private:
 };
 template <typename T>
 constexpr auto cosh(T x) noexcept {
-  return make_cosinus_hyperbolicus(x);
+  return make_cosinus_hyperbolicus(as_expression(x));
 }
 
 template <typename T>
@@ -507,7 +507,7 @@ private:
 };
 template <typename T>
 constexpr auto tanh(T x) noexcept {
-  return make_tangens_hyperbolicus(x);
+  return make_tangens_hyperbolicus(as_expression(x));
 }
 
 template <typename T>
@@ -537,7 +537,7 @@ private:
 };
 template <typename T>
 constexpr auto asin(T x) noexcept {
-  return make_arcus_sinus(x);
+  return make_arcus_sinus(as_expression(x));
 }
 
 template <typename T>
@@ -568,7 +568,7 @@ private:
 };
 template <typename T>
 constexpr auto acos(T x) noexcept {
-  return make_arcus_cosinus(x);
+  return make_arcus_cosinus(as_expression(x));
 }
 
 template <typename T>
@@ -598,7 +598,7 @@ private:
 };
 template <typename T>
 constexpr auto atan(T x) noexcept {
-  return make_arcus_tangens(x);
+  return make_arcus_tangens(as_expression(x));
 }
 
 template <typename T>
@@ -628,7 +628,7 @@ private:
 };
 template <typename T>
 constexpr auto asinh(T x) noexcept {
-  return make_area_sinus_hyperbolicus(x);
+  return make_area_sinus_hyperbolicus(as_expression(x));
 }
 template <typename T>
 constexpr auto make_area_cosinus_hyperbolicus(T x) noexcept {
@@ -662,7 +662,7 @@ private:
 };
 template <typename T>
 constexpr auto acosh(T x) noexcept {
-  return make_area_cosinus_hyperbolicus(x);
+  return make_area_cosinus_hyperbolicus(as_expression(x));
 }
 template <typename T>
 constexpr auto make_area_tangens_hyperbolicus(T x) noexcept {
@@ -693,7 +693,7 @@ private:
 };
 template <typename T>
 constexpr auto atanh(T x) noexcept {
-  return make_area_tangens_hyperbolicus(x);
+  return make_area_tangens_hyperbolicus(as_expression(x));
 }
 
 template <typename L, typename R,
