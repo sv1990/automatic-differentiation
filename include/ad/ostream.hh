@@ -4,7 +4,6 @@
 #include "ad.hh"
 
 #include <ostream>
-#include <sstream>
 
 namespace ad {
 namespace detail {
