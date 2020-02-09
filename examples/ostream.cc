@@ -1,4 +1,4 @@
-#include "ad/to_string.hh"
+#include "ad/ostream.hh"
 #include "ad/ad.hh"
 
 #include <iostream>
@@ -9,13 +9,6 @@ struct format_variable<variable<0>> {
   static inline std::string rep = "x";
 };
 } // namespace ad
-
-namespace ad { namespace detail {
-template <typename E, std::enable_if_t<is_expression_v<E>>* = nullptr>
-std::ostream& operator<<(std::ostream& os, const E& e) {
-  return os << to_string(e);
-}
-}} // namespace ad::detail
 
 int main() {
   using namespace ad::literals;
