@@ -1005,7 +1005,9 @@ struct power : expression_base<power<L, R>> {
   constexpr auto derive() const noexcept {
     if constexpr (is_constant_v<R>) {
       return make_multiplication(
-          rhs, make_power(lhs, make_subtraction(rhs, unity{})));
+          lhs.template derive<I>(),
+          make_multiplication(rhs,
+                              make_power(lhs, make_subtraction(rhs, unity{}))));
     }
     else {
       return make_multiplication(
