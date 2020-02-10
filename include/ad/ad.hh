@@ -992,6 +992,16 @@ constexpr auto make_power(division<L, R> lhs, negation<T> rhs) noexcept {
 }
 
 template <typename L, typename R>
+constexpr auto make_power(exponential<L> lhs, R rhs) noexcept {
+  return make_exponential(make_multiplication(lhs.arg, rhs));
+}
+
+template <typename L, typename R, typename T>
+constexpr auto make_power(power<L, R> lhs, T rhs) noexcept {
+  return make_power(lhs.lhs, make_multiplication(lhs.rhs, rhs));
+}
+
+template <typename L, typename R>
 struct power : expression_base<power<L, R>> {
   using expression_base<power>::derive;
   [[no_unique_address]] L lhs;
