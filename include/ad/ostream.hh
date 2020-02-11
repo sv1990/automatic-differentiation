@@ -43,6 +43,18 @@ private:
     os << ')';
   }
   template <typename T>
+  static void print_with_brackets(std::ostream& os, bool needs_brackets,
+                                  const T& x) {
+    if (needs_brackets) {
+      os << '(';
+    }
+    print(os, x);
+    if (needs_brackets) {
+      os << ')';
+    }
+  }
+
+  template <typename T>
   static void print_binary_operator(std::ostream& os, std::string_view op,
                                     const T& x) {
     const auto& lhs = x.lhs;
@@ -51,21 +63,9 @@ private:
     const bool lhs_needs_brackets = precedence(x) > precedence(lhs);
     const bool rhs_needs_brackets = precedence(x) > precedence(rhs);
 
-    if (lhs_needs_brackets) {
-      os << '(';
-    }
-    print(os, lhs);
-    if (lhs_needs_brackets) {
-      os << ')';
-    }
+    print_with_brackets(os, lhs_needs_brackets, lhs);
     os << ' ' << op << ' ';
-    if (rhs_needs_brackets) {
-      os << '(';
-    }
-    print(os, rhs);
-    if (rhs_needs_brackets) {
-      os << ')';
-    }
+    print_with_brackets(os, rhs_needs_brackets, rhs);
   }
 
   template <typename L, typename R>
