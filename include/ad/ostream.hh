@@ -109,7 +109,7 @@ public:
   }
   template <typename L, typename R>
   static void print(std::ostream& os, const power<L, R>& x) {
-    print_binary_operator(os, "^", x);
+    print_binary_operator(os, "**", x);
   }
 
   template <typename T>
