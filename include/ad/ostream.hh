@@ -24,6 +24,20 @@ struct format_variable<variable<N>> {
 };
 
 namespace detail {
+template <template <typename, typename> typename Op>
+struct is_operator {
+  template <typename T>
+  bool operator()(const T&) const noexcept {
+    return false;
+  }
+  template <typename L, typename R>
+  bool operator()(const Op<L, R>&) const noexcept {
+    return true;
+  }
+};
+is_operator<addition> is_addition;
+is_operator<multiplication> is_multiplication;
+
 struct print_impl {
   template <typename T, std::enable_if_t<is_constant_v<T>>* = nullptr>
   static void print(std::ostream& os, const T& x) {
@@ -61,7 +75,11 @@ private:
     const auto& rhs = x.rhs;
 
     const bool lhs_needs_brackets = precedence(x) > precedence(lhs);
-    const bool rhs_needs_brackets = precedence(x) > precedence(rhs);
+    const bool rhs_needs_brackets =
+        precedence(x) > precedence(rhs)               //
+        || (precedence(x) == precedence(rhs)          //
+            && !((is_addition(x) && is_addition(rhs)) //
+                 || (is_multiplication(x) && is_multiplication(rhs))));
 
     print_with_brackets(os, lhs_needs_brackets, lhs);
     os << ' ' << op << ' ';
@@ -221,6 +239,13 @@ std::ostream& operator<<(std::ostream& os, const E& x) {
   return os;
 }
 } // namespace detail
+
+template <typename E, std::enable_if_t<detail::is_expression_v<E>>* = nullptr>
+std::string to_string(const E& x) {
+  std::ostringstream oss;
+  oss << x;
+  return std::move(oss).str();
+}
 } // namespace ad
 
 #endif // AUTOMATIC_DIFFERENTIATION_TO_STRING_HH_1580212136098641559_

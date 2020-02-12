@@ -1,4 +1,9 @@
 #include "ad/ad.hh"
+#include "ad/ostream.hh"
+
+#include <cassert>
+
+#undef NDEBUG
 
 template <typename T, typename U>
 constexpr bool same_type(T, U) noexcept {
@@ -40,4 +45,9 @@ int main() {
 
   static_assert(same_type(ad::pow(ad::exp(x), 2_c), ad::exp(x * 2_c)));
   static_assert(same_type(ad::pow(ad::pow(x, 2_c), 2_c), ad::pow(x, 4_c)));
+
+  assert(ad::to_string(1_c / (x * ad::exp(x))) == "1 / (x0 * exp(x0))");
+  assert(ad::to_string(1_c - (x + 1_c)) == "1 - (x0 + 1)");
+  assert(ad::to_string(1_c + (x + 1_c)) == "1 + x0 + 1");
+  assert(ad::to_string(2_c * (x * 2_c)) == "2 * x0 * 2");
 }
