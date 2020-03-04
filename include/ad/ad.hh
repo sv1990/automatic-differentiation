@@ -71,6 +71,9 @@ inline constexpr bool is_variable_v = is_variable<T>::value;
 
 struct expression_base {};
 
+template <typename T>
+inline constexpr bool is_expression_v = std::is_base_of_v<expression_base, T>;
+
 template <typename Derived>
 struct expression : expression_base {
   template <typename... Ts,
@@ -139,9 +142,6 @@ struct unary_function : expression<unary_function<Derived>> {
                                derived.derive_outer());
   }
 };
-
-template <typename T>
-inline constexpr bool is_expression_v = std::is_base_of_v<expression_base, T>;
 
 template <long N>
 struct static_constant : expression<static_constant<N>> {
