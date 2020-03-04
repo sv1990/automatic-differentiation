@@ -69,6 +69,8 @@ struct is_variable<variable<N>> : std::true_type {};
 template <typename T>
 inline constexpr bool is_variable_v = is_variable<T>::value;
 
+// TODO: Maybe revert to commit 995a964886a9115dc91d0ab7836d6c9a435cd5c6
+// since this prevents EBO
 struct expression_base {};
 
 template <typename T>
