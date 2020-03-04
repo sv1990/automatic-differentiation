@@ -69,8 +69,10 @@ struct is_variable<variable<N>> : std::true_type {};
 template <typename T>
 inline constexpr bool is_variable_v = is_variable<T>::value;
 
+struct expression_base {};
+
 template <typename Derived>
-struct expression_base {
+struct expression_derive : expression_base {
   template <typename... Ts,
             std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
   constexpr auto derive(Ts...) const noexcept {
@@ -128,8 +130,8 @@ struct expression_base {
 };
 
 template <typename Derived>
-struct unary_function : expression_base<unary_function<Derived>> {
-  using expression_base<unary_function>::derive;
+struct unary_function : expression_derive<unary_function<Derived>> {
+  using expression_derive<unary_function>::derive;
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     const Derived& derived = static_cast<const Derived&>(*this);
@@ -139,13 +141,11 @@ struct unary_function : expression_base<unary_function<Derived>> {
 };
 
 template <typename T>
-inline constexpr bool is_expression_v =
-    std::is_base_of_v<expression_base<T>, T> ||
-    std::is_base_of_v<unary_function<T>, T>;
+inline constexpr bool is_expression_v = std::is_base_of_v<expression_base, T>;
 
 template <long N>
-struct static_constant : expression_base<static_constant<N>> {
-  using expression_base<static_constant>::derive;
+struct static_constant : expression_derive<static_constant<N>> {
+  using expression_derive<static_constant>::derive;
   constexpr double value() const noexcept { return static_cast<double>(N); }
   template <typename... Ts>
   constexpr double operator()(Ts...) const noexcept {
@@ -172,8 +172,8 @@ inline constexpr bool is_static_constant_v = is_static_constant<T>::value;
 using zero  = static_constant<0>;
 using unity = static_constant<1>;
 
-struct runtime_constant : expression_base<runtime_constant> {
-  using expression_base<runtime_constant>::derive;
+struct runtime_constant : expression_derive<runtime_constant> {
+  using expression_derive<runtime_constant>::derive;
   double _value;
   constexpr explicit runtime_constant(double value) noexcept : _value(value) {}
   constexpr double value() const noexcept { return _value; }
@@ -220,8 +220,8 @@ constexpr auto get(Ts... xs) noexcept {
 }
 
 template <std::size_t N>
-struct variable : expression_base<variable<N>> {
-  using expression_base<variable>::derive;
+struct variable : expression_derive<variable<N>> {
+  using expression_derive<variable>::derive;
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
     return static_cast<double>(get<N>(xs...));
@@ -732,8 +732,8 @@ constexpr auto operator+(L l, R r) noexcept {
 }
 
 template <typename L, typename R>
-struct addition : expression_base<addition<L, R>> {
-  using expression_base<addition>::derive;
+struct addition : expression_derive<addition<L, R>> {
+  using expression_derive<addition>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr explicit addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
@@ -783,8 +783,8 @@ constexpr auto operator-(L l, R r) noexcept {
 }
 
 template <typename L, typename R>
-struct subtraction : expression_base<subtraction<L, R>> {
-  using expression_base<subtraction>::derive;
+struct subtraction : expression_derive<subtraction<L, R>> {
+  using expression_derive<subtraction>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr explicit subtraction(L lhs_, R rhs_) noexcept
@@ -800,8 +800,8 @@ struct subtraction : expression_base<subtraction<L, R>> {
 };
 
 template <typename L, typename R>
-struct multiplication : expression_base<multiplication<L, R>> {
-  using expression_base<multiplication>::derive;
+struct multiplication : expression_derive<multiplication<L, R>> {
+  using expression_derive<multiplication>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr explicit multiplication(L lhs_, R rhs_) noexcept
@@ -929,8 +929,8 @@ constexpr auto make_division(exponential<L> l, exponential<R> r) noexcept {
 }
 
 template <typename L, typename R>
-struct division : expression_base<division<L, R>> {
-  using expression_base<division>::derive;
+struct division : expression_derive<division<L, R>> {
+  using expression_derive<division>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr explicit division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
@@ -1002,8 +1002,8 @@ constexpr auto make_power(power<L, R> lhs, T rhs) noexcept {
 }
 
 template <typename L, typename R>
-struct power : expression_base<power<L, R>> {
-  using expression_base<power>::derive;
+struct power : expression_derive<power<L, R>> {
+  using expression_derive<power>::derive;
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr explicit power(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
@@ -1065,8 +1065,8 @@ constexpr auto make_negation(division<L, R> x) noexcept {
 }
 
 template <typename T>
-struct negation : expression_base<negation<T>> {
-  using expression_base<negation>::derive;
+struct negation : expression_derive<negation<T>> {
+  using expression_derive<negation>::derive;
   [[no_unique_address]] T arg;
   constexpr explicit negation(T x) noexcept : arg(x) {}
   template <typename... Ts>
