@@ -46,6 +46,10 @@ int main() {
   static_assert(same_type(ad::pow(ad::exp(x), 2_c), ad::exp(x * 2_c)));
   static_assert(same_type(ad::pow(ad::pow(x, 2_c), 2_c), ad::pow(x, 4_c)));
 
+  static_assert(sizeof(ad::exp(x)) == 1);
+  static_assert(sizeof(x + 1_c) == 1);
+  static_assert(sizeof((x + 1_c) * (x - 1_c)) <= 2);
+
   assert(ad::to_string(1_c / (x * ad::exp(x))) == "1 / (x0 * exp(x0))");
   assert(ad::to_string(1_c - (x + 1_c)) == "1 - (x0 + 1)");
   assert(ad::to_string(1_c + (x + 1_c)) == "1 + x0 + 1");

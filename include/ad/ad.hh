@@ -69,15 +69,8 @@ struct is_variable<variable<N>> : std::true_type {};
 template <typename T>
 inline constexpr bool is_variable_v = is_variable<T>::value;
 
-// TODO: Maybe revert to commit 995a964886a9115dc91d0ab7836d6c9a435cd5c6
-// since this prevents EBO
-struct expression_base {};
-
-template <typename T>
-inline constexpr bool is_expression_v = std::is_base_of_v<expression_base, T>;
-
 template <typename Derived>
-struct expression : expression_base {
+struct expression {
   template <typename... Ts,
             std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
   constexpr auto derive(Ts...) const noexcept {
@@ -144,6 +137,10 @@ struct unary_function : expression<unary_function<Derived>> {
                                derived.derive_outer());
   }
 };
+
+template <typename T>
+inline constexpr bool is_expression_v = std::is_base_of_v<expression<T>, T> ||
+                                        std::is_base_of_v<unary_function<T>, T>;
 
 template <long N>
 struct static_constant : expression<static_constant<N>> {
