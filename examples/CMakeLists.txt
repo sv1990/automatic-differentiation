@@ -18,3 +18,8 @@ add_executable(error_propagation error_propagation.cc)
 target_compile_features(error_propagation PRIVATE cxx_std_20)
 target_compile_options(error_propagation PRIVATE "-Wall;-Wextra;-pedantic")
 target_link_libraries(error_propagation PRIVATE ad::ad)
+
+add_executable(gradient gradient.cc)
+target_compile_features(gradient PRIVATE cxx_std_20)
+target_compile_options(gradient PRIVATE "-Wall;-Wextra;-pedantic")
+target_link_libraries(gradient PRIVATE ad::ad)
