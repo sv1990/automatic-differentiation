@@ -18,3 +18,8 @@ add_executable(error_propagation error_propagation.cc)
 target_compile_features(error_propagation PRIVATE cxx_std_20)
 target_compile_options(error_propagation PRIVATE "-Wall;-Wextra;-pedantic")
 target_link_libraries(error_propagation PRIVATE ad::ad)
+
+add_executable(find_root find_root.cc)
+target_compile_features(find_root PRIVATE cxx_std_20)
+target_compile_options(find_root PRIVATE "-Wall;-Wextra;-pedantic")
+target_link_libraries(find_root PRIVATE ad::ad)
