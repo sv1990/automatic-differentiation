@@ -1,0 +1,5 @@
+---
+Checks:          'bugprone*,misc*,modernize*,performance*,readability*,clang-analyzer*,-modernize-use-trailing-return-type,-readability-magic-numbers,-readability-qualified-auto'
+WarningsAsErrors: '1'
+HeaderFilterRegex: ''
+FormatStyle:     none
