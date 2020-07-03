@@ -4,7 +4,7 @@
 #include <iostream>
 
 template <>
-struct ad::format_variable<ad::variable<0>> {
+struct ad::format_variable<0> {
   static inline std::string rep = "x";
 };
 

@@ -16,10 +16,8 @@ std::string concat(const Ts&... xs) {
 }
 } // namespace detail
 
-template <typename T>
-struct format_variable;
 template <std::size_t N>
-struct format_variable<variable<N>> {
+struct format_variable {
   static inline std::string rep = detail::concat("x", N);
 };
 
@@ -45,7 +43,7 @@ struct print_impl {
   }
   template <std::size_t N>
   static void print(std::ostream& os, const variable<N>&) {
-    os << format_variable<variable<N>>::rep;
+    os << format_variable<N>::rep;
   }
 
 private:
