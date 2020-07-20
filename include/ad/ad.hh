@@ -55,11 +55,9 @@ template <typename T>
 struct area_tangens_hyperbolicus;
 
 template <typename T>
-struct is_constant : std::false_type {};
+inline constexpr bool is_constant_v = false;
 
-template <typename T>
-inline constexpr bool is_constant_v = is_constant<T>::value;
-
+// Has to be a struct to enable use with `std::conjunction`
 template <typename T>
 struct is_variable : std::false_type {};
 
@@ -157,16 +155,13 @@ struct static_constant : expression<static_constant<N>> {
 };
 
 template <long N>
-struct is_constant<static_constant<N>> : std::true_type {};
+inline constexpr bool is_constant_v<static_constant<N>> = true;
 
 template <typename T>
-struct is_static_constant : std::false_type {};
+inline constexpr bool is_static_constant_v = false;
 
 template <long N>
-struct is_static_constant<static_constant<N>> : std::true_type {};
-
-template <typename T>
-inline constexpr bool is_static_constant_v = is_static_constant<T>::value;
+inline constexpr bool is_static_constant_v<static_constant<N>> = true;
 
 using zero  = static_constant<0>;
 using unity = static_constant<1>;
@@ -187,7 +182,7 @@ struct runtime_constant : expression<runtime_constant> {
 };
 
 template <>
-struct is_constant<runtime_constant> : std::true_type {};
+inline constexpr bool is_constant_v<runtime_constant> = true;
 
 template <typename...>
 inline constexpr bool dependent_false = false;
