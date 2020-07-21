@@ -53,6 +53,8 @@ template <typename T>
 struct area_cosinus_hyperbolicus;
 template <typename T>
 struct area_tangens_hyperbolicus;
+template <typename T>
+constexpr auto operator-(T x) noexcept;
 
 template <typename T>
 inline constexpr bool is_constant_v = false;
@@ -131,8 +133,7 @@ struct unary_function : expression<unary_function<Derived>> {
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     const Derived& derived = static_cast<const Derived&>(*this);
-    return make_multiplication(derived.arg.template derive<I>(),
-                               derived.derive_outer());
+    return derived.arg.template derive<I>() * derived.derive_outer();
   }
 };
 
@@ -233,12 +234,12 @@ struct variable : expression<variable<N>> {
 };
 
 template <typename T>
-constexpr auto make_exponential(T x) noexcept {
-  return exponential<T>(x);
+constexpr auto exp(T x) noexcept {
+  return exponential(as_expression(x));
 }
 
 template <typename T>
-constexpr auto make_exponential(logarithm<T> x) noexcept {
+constexpr auto exp(logarithm<T> x) noexcept {
   return x.arg;
 }
 
@@ -258,13 +259,8 @@ private:
 };
 
 template <typename T>
-constexpr auto exp(T x) noexcept {
-  return make_exponential(as_expression(x));
-}
-
-template <typename T>
-constexpr auto make_square_root(T x) noexcept {
-  return square_root<T>(x);
+constexpr auto sqrt(T x) noexcept {
+  return square_root(as_expression(x));
 }
 
 template <typename T>
@@ -280,23 +276,17 @@ struct square_root : unary_function<square_root<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_division(unity{},
-                         make_multiplication(static_constant<2>{}, *this));
+    return unity{} / (static_constant<2>{} * *this);
   }
 };
 
 template <typename T>
-constexpr auto sqrt(T x) noexcept {
-  return make_square_root(as_expression(x));
+constexpr auto log(T x) noexcept {
+  return logarithm(as_expression(x));
 }
 
 template <typename T>
-constexpr auto make_logarithm(T x) noexcept {
-  return logarithm<T>(x);
-}
-
-template <typename T>
-constexpr auto make_logarithm(exponential<T> x) noexcept {
+constexpr auto log(exponential<T> x) noexcept {
   return x.arg;
 }
 
@@ -312,22 +302,15 @@ struct logarithm : unary_function<logarithm<T>> {
   }
 
 private:
-  constexpr auto derive_outer() const noexcept {
-    return make_division(unity{}, arg);
-  }
+  constexpr auto derive_outer() const noexcept { return unity{} / arg; }
 };
 
 template <typename T>
-constexpr auto log(T x) noexcept {
-  return make_logarithm(as_expression(x));
-}
-
-template <typename T>
-constexpr auto make_sinus(T x) noexcept {
-  return sinus<T>(x);
+constexpr auto sin(T x) noexcept {
+  return sinus(as_expression(x));
 }
 template <typename T>
-constexpr auto make_sinus(arcus_sinus<T> x) noexcept {
+constexpr auto sin(arcus_sinus<T> x) noexcept {
   return x.arg;
 }
 
@@ -343,21 +326,16 @@ struct sinus : unary_function<sinus<T>> {
   }
 
 private:
-  constexpr auto derive_outer() const noexcept { return make_cosinus(arg); }
+  constexpr auto derive_outer() const noexcept { return cos(arg); }
 };
 
 template <typename T>
-constexpr auto sin(T x) noexcept {
-  return make_sinus(as_expression(x));
+constexpr auto cos(T x) noexcept {
+  return cosinus(as_expression(x));
 }
 
 template <typename T>
-constexpr auto make_cosinus(T x) noexcept {
-  return cosinus<T>(x);
-}
-
-template <typename T>
-constexpr auto make_cosinus(arcus_cosinus<T> x) noexcept {
+constexpr auto cos(arcus_cosinus<T> x) noexcept {
   return x.arg;
 }
 
@@ -373,22 +351,15 @@ struct cosinus : unary_function<cosinus<T>> {
   }
 
 private:
-  constexpr auto derive_outer() const noexcept {
-    return make_negation(make_sinus(arg));
-  }
+  constexpr auto derive_outer() const noexcept { return -sin(arg); }
 };
 
 template <typename T>
-constexpr auto cos(T x) noexcept {
-  return make_cosinus(as_expression(x));
-}
-
-template <typename T>
-constexpr auto make_tangens(T x) noexcept {
-  return tangens<T>(x);
+constexpr auto tan(T x) noexcept {
+  return tangens(as_expression(x));
 }
 template <typename T>
-constexpr auto make_tangens(arcus_tangens<T> x) noexcept {
+constexpr auto tan(arcus_tangens<T> x) noexcept {
   return x.arg;
 }
 
@@ -405,21 +376,16 @@ struct tangens : unary_function<tangens<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_addition(unity{}, make_multiplication(*this, *this));
+    return unity{} + (*this * *this);
   }
 };
 
 template <typename T>
-constexpr auto tan(T x) noexcept {
-  return make_tangens(as_expression(x));
-}
-
-template <typename T>
-constexpr auto make_sinus_hyperbolicus(T x) noexcept {
-  return sinus_hyperbolicus<T>(x);
+constexpr auto sinh(T x) noexcept {
+  return sinus_hyperbolicus(as_expression(x));
 }
 template <typename T>
-constexpr auto make_sinus_hyperbolicus(area_sinus_hyperbolicus<T> x) noexcept {
+constexpr auto sinh(area_sinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
@@ -434,22 +400,15 @@ struct sinus_hyperbolicus : unary_function<sinus_hyperbolicus<T>> {
   }
 
 private:
-  constexpr auto derive_outer() const noexcept {
-    return make_cosinus_hyperbolicus(arg);
-  }
+  constexpr auto derive_outer() const noexcept { return cosh(arg); }
 };
-template <typename T>
-constexpr auto sinh(T x) noexcept {
-  return make_sinus_hyperbolicus(as_expression(x));
-}
 
 template <typename T>
-constexpr auto make_cosinus_hyperbolicus(T x) noexcept {
-  return cosinus_hyperbolicus<T>(x);
+constexpr auto cosh(T x) noexcept {
+  return cosinus_hyperbolicus(as_expression(x));
 }
 template <typename T>
-constexpr auto
-make_cosinus_hyperbolicus(area_cosinus_hyperbolicus<T> x) noexcept {
+constexpr auto cosh(area_cosinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
@@ -464,22 +423,15 @@ struct cosinus_hyperbolicus : unary_function<cosinus_hyperbolicus<T>> {
   }
 
 private:
-  constexpr auto derive_outer() const noexcept {
-    return make_sinus_hyperbolicus(arg);
-  }
+  constexpr auto derive_outer() const noexcept { return sinh(arg); }
 };
-template <typename T>
-constexpr auto cosh(T x) noexcept {
-  return make_cosinus_hyperbolicus(as_expression(x));
-}
 
 template <typename T>
-constexpr auto make_tangens_hyperbolicus(T x) noexcept {
-  return tangens_hyperbolicus<T>(x);
+constexpr auto tanh(T x) noexcept {
+  return tangens_hyperbolicus(as_expression(x));
 }
 template <typename T>
-constexpr auto
-make_tangens_hyperbolicus(area_tangens_hyperbolicus<T> x) noexcept {
+constexpr auto tanh(area_tangens_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
 
@@ -496,20 +448,16 @@ struct tangens_hyperbolicus : unary_function<tangens_hyperbolicus<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_subtraction(unity{}, make_multiplication(*this, *this));
+    return unity{} - (*this * *this);
   }
 };
-template <typename T>
-constexpr auto tanh(T x) noexcept {
-  return make_tangens_hyperbolicus(as_expression(x));
-}
 
 template <typename T>
-constexpr auto make_arcus_sinus(T x) noexcept {
-  return arcus_sinus<T>(x);
+constexpr auto asin(T x) noexcept {
+  return arcus_sinus(as_expression(x));
 }
 template <typename T>
-constexpr auto make_arcus_sinus(sinus<T> x) noexcept {
+constexpr auto asin(sinus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
@@ -525,21 +473,16 @@ struct arcus_sinus : unary_function<arcus_sinus<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_division(unity{}, make_square_root(make_subtraction(
-                                      unity{}, make_multiplication(arg, arg))));
+    return unity{} / sqrt(unity{} - arg * arg);
   }
 };
-template <typename T>
-constexpr auto asin(T x) noexcept {
-  return make_arcus_sinus(as_expression(x));
-}
 
 template <typename T>
-constexpr auto make_arcus_cosinus(T x) noexcept {
-  return arcus_cosinus<T>(x);
+constexpr auto acos(T x) noexcept {
+  return arcus_cosinus(as_expression(x));
 }
 template <typename T>
-constexpr auto make_arcus_cosinus(cosinus<T> x) noexcept {
+constexpr auto acos(cosinus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
@@ -555,22 +498,16 @@ struct arcus_cosinus : unary_function<arcus_cosinus<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_negation(
-        make_division(unity{}, make_square_root(make_subtraction(
-                                   unity{}, make_multiplication(arg, arg)))));
+    return -unity{} / sqrt(unity{} - arg * arg);
   }
 };
-template <typename T>
-constexpr auto acos(T x) noexcept {
-  return make_arcus_cosinus(as_expression(x));
-}
 
 template <typename T>
-constexpr auto make_arcus_tangens(T x) noexcept {
-  return arcus_tangens<T>(x);
+constexpr auto atan(T x) noexcept {
+  return arcus_tangens(as_expression(x));
 }
 template <typename T>
-constexpr auto make_arcus_tangens(tangens<T> x) noexcept {
+constexpr auto atan(tangens<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
@@ -586,21 +523,16 @@ struct arcus_tangens : unary_function<arcus_tangens<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_division(unity{},
-                         make_addition(unity{}, make_multiplication(arg, arg)));
+    return unity{} / (unity{} + arg * arg);
   }
 };
-template <typename T>
-constexpr auto atan(T x) noexcept {
-  return make_arcus_tangens(as_expression(x));
-}
 
 template <typename T>
-constexpr auto make_area_sinus_hyperbolicus(T x) noexcept {
-  return area_sinus_hyperbolicus<T>(x);
+constexpr auto asinh(T x) noexcept {
+  return area_sinus_hyperbolicus(as_expression(x));
 }
 template <typename T>
-constexpr auto make_area_sinus_hyperbolicus(sinus_hyperbolicus<T> x) noexcept {
+constexpr auto asinh(sinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
 template <typename T>
@@ -616,21 +548,16 @@ struct area_sinus_hyperbolicus : unary_function<area_sinus_hyperbolicus<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_division(unity{}, make_square_root(make_addition(
-                                      unity{}, make_multiplication(arg, arg))));
+    return unity{} / sqrt(unity{} + arg * arg);
   }
 };
+
 template <typename T>
-constexpr auto asinh(T x) noexcept {
-  return make_area_sinus_hyperbolicus(as_expression(x));
+constexpr auto acosh(T x) noexcept {
+  return area_cosinus_hyperbolicus(as_expression(x));
 }
 template <typename T>
-constexpr auto make_area_cosinus_hyperbolicus(T x) noexcept {
-  return area_cosinus_hyperbolicus<T>(x);
-}
-template <typename T>
-constexpr auto
-make_area_cosinus_hyperbolicus(cosinus_hyperbolicus<T> x) noexcept {
+constexpr auto acosh(cosinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
 
@@ -648,25 +575,20 @@ struct area_cosinus_hyperbolicus
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_division(
-        unity{},
-        make_multiplication(make_square_root(make_subtraction(arg, unity{})),
-                            make_square_root(make_addition(unity{}, arg))));
+    return unity{} / sqrt(arg - unity{}) * sqrt(unity{} + arg);
   }
 };
+
 template <typename T>
-constexpr auto acosh(T x) noexcept {
-  return make_area_cosinus_hyperbolicus(as_expression(x));
+constexpr auto atanh(T x) noexcept {
+  return area_tangens_hyperbolicus(as_expression(x));
 }
+
 template <typename T>
-constexpr auto make_area_tangens_hyperbolicus(T x) noexcept {
-  return area_tangens_hyperbolicus<T>(x);
-}
-template <typename T>
-constexpr auto
-make_area_tangens_hyperbolicus(tangens_hyperbolicus<T> x) noexcept {
+constexpr auto atanh(tangens_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
+
 template <typename T>
 struct area_tangens_hyperbolicus
     : unary_function<area_tangens_hyperbolicus<T>> {
@@ -681,48 +603,37 @@ struct area_tangens_hyperbolicus
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return make_division(
-        unity{}, make_subtraction(unity{}, make_multiplication(arg, arg)));
+    return unity{} / (unity{} - arg * arg);
   }
 };
-template <typename T>
-constexpr auto atanh(T x) noexcept {
-  return make_area_tangens_hyperbolicus(as_expression(x));
-}
 
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
-constexpr auto make_addition(L l, R r) noexcept {
-  return addition<L, R>(l, r);
+constexpr auto operator+(L l, R r) noexcept {
+  return addition(as_expression(l), as_expression(r));
 }
 
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
                            (!is_static_constant_v<L> ||
                             !is_static_constant_v<R>)>* = nullptr>
-constexpr auto make_addition(L l, R r) noexcept {
+constexpr auto operator+(L l, R r) noexcept {
   return runtime_constant{l.value() + r.value()};
 }
 
 template <long N1, long N2>
-constexpr auto make_addition(static_constant<N1>,
-                             static_constant<N2>) noexcept {
+constexpr auto operator+(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 + N2>{};
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr auto make_addition(zero, T x) noexcept {
-  return x;
+constexpr auto operator+(zero, T x) noexcept {
+  return as_expression(x);
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr auto make_addition(T x, zero) noexcept {
-  return x;
-}
-
-template <typename L, typename R>
-constexpr auto operator+(L l, R r) noexcept {
-  return make_addition(as_expression(l), as_expression(r));
+constexpr auto operator+(T x, zero) noexcept {
+  return as_expression(x);
 }
 
 template <typename L, typename R>
@@ -737,43 +648,37 @@ struct addition : expression<addition<L, R>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_addition(lhs.template derive<I>(), rhs.template derive<I>());
+    return operator+(lhs.template derive<I>(), rhs.template derive<I>());
   }
 };
 
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
-constexpr auto make_subtraction(L l, R r) noexcept {
-  return subtraction<L, R>(l, r);
+constexpr auto operator-(L l, R r) noexcept {
+  return subtraction(as_expression(l), as_expression(r));
 }
 
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
                            (!is_static_constant_v<L> ||
                             !is_static_constant_v<R>)>* = nullptr>
-constexpr auto make_subtraction(L l, R r) noexcept {
+constexpr auto operator-(L l, R r) noexcept {
   return runtime_constant{l.value() - r.value()};
 }
 
 template <long N1, long N2>
-constexpr auto make_subtraction(static_constant<N1>,
-                                static_constant<N2>) noexcept {
+constexpr auto operator-(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 - N2>{};
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr auto make_subtraction(T x, zero) noexcept {
-  return x;
+constexpr auto operator-(T x, zero) noexcept {
+  return as_expression(x);
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr auto make_subtraction(zero, T x) noexcept {
-  return make_negation(x);
-}
-
-template <typename L, typename R>
-constexpr auto operator-(L l, R r) noexcept {
-  return make_subtraction(as_expression(l), as_expression(r));
+constexpr auto operator-(zero, T x) noexcept {
+  return -x;
 }
 
 template <typename L, typename R>
@@ -789,7 +694,7 @@ struct subtraction : expression<subtraction<L, R>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_subtraction(lhs.template derive<I>(), rhs.template derive<I>());
+    return lhs.template derive<I>() - rhs.template derive<I>();
   }
 };
 
@@ -806,120 +711,112 @@ struct multiplication : expression<multiplication<L, R>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_addition(make_multiplication(lhs.template derive<I>(), rhs),
-                         make_multiplication(lhs, rhs.template derive<I>()));
+    return (lhs.template derive<I>() * rhs) + (lhs * rhs.template derive<I>());
   }
 };
 
 template <typename L, typename R,
           std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
-constexpr auto make_multiplication(L l, R r) noexcept {
-  return multiplication<L, R>(l, r);
+constexpr auto operator*(L l, R r) noexcept {
+  return multiplication(as_expression(l), as_expression(r));
 }
 
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
                            (!is_static_constant_v<L> ||
                             !is_static_constant_v<R>)>* = nullptr>
-constexpr auto make_multiplication(L l, R r) noexcept {
+constexpr auto operator*(L l, R r) noexcept {
   return runtime_constant{l.value() * r.value()};
 }
 
 template <long N1, long N2>
-constexpr auto make_multiplication(static_constant<N1>,
-                                   static_constant<N2>) noexcept {
+constexpr auto operator*(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 * N2>{};
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr auto make_multiplication(T, zero) noexcept {
+constexpr auto operator*(T, zero) noexcept {
   return zero{};
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr auto make_multiplication(zero, T) noexcept {
+constexpr auto operator*(zero, T) noexcept {
   return zero{};
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr auto make_multiplication(T x, unity) noexcept {
-  return x;
+constexpr auto operator*(T x, unity) noexcept {
+  return as_expression(x);
 }
 
 template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
-constexpr auto make_multiplication(unity, T x) noexcept {
-  return x;
+constexpr auto operator*(unity, T x) noexcept {
+  return as_expression(x);
 }
 
 template <typename L, typename R>
-constexpr auto make_multiplication(negation<L> l, negation<R> r) noexcept {
-  return make_multiplication(l.arg, r.arg);
+constexpr auto operator*(negation<L> l, negation<R> r) noexcept {
+  return l.arg * r.arg;
 }
 
 template <typename L, typename R>
-constexpr auto make_multiplication(exponential<L> l,
-                                   exponential<R> r) noexcept {
-  return make_exponential(make_addition(l.arg, r.arg));
+constexpr auto operator*(exponential<L> l, exponential<R> r) noexcept {
+  return exp(l.arg + r.arg);
 }
 
 template <typename L, typename R,
           std::enable_if_t<!std::is_same_v<L, unity>>* = nullptr>
-constexpr auto make_multiplication(L l, division<unity, R> r) noexcept {
-  return make_division(l, r.rhs);
+constexpr auto operator*(L l, division<unity, R> r) noexcept {
+  return l / r.rhs;
 }
 
 template <typename L, typename R,
           std::enable_if_t<!std::is_same_v<R, unity>>* = nullptr>
-constexpr auto make_multiplication(division<unity, L> l, R r) noexcept {
-  return make_division(r, l.rhs);
-}
-
-template <typename L, typename R>
-constexpr auto operator*(L l, R r) noexcept {
-  return make_multiplication(as_expression(l), as_expression(r));
+constexpr auto operator*(division<unity, L> l, R r) noexcept {
+  return r / l.rhs;
 }
 
 template <typename L, typename R,
           std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
-constexpr auto make_division(L l, R r) noexcept {
-  return division<L, R>(l, r);
+constexpr auto operator/(L l, R r) noexcept {
+  return division(as_expression(l), as_expression(r));
 }
 
 // TODO: Overload for static_constant?
 template <typename L, typename R,
           std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
-constexpr auto make_division(L l, R r) noexcept {
+constexpr auto operator/(L l, R r) noexcept {
   return runtime_constant{l.value() / r.value()};
 }
 
 template <typename R>
-constexpr auto make_division(zero, R) noexcept {
+constexpr auto operator/(zero, R) noexcept {
   return zero{};
 }
 
 template <typename L>
-constexpr auto make_division(L l, unity) noexcept {
-  return l;
+constexpr auto operator/(L l, unity) noexcept {
+  return as_expression(l);
 }
 
 template <typename T, typename L, typename R>
-constexpr auto make_division(T l, division<L, R> r) noexcept {
-  return make_division(make_multiplication(l, r.rhs), r.lhs);
+constexpr auto operator/(T l, division<L, R> r) noexcept {
+  return l * r.rhs / r.lhs;
 }
 
 template <typename L, typename R, typename T>
-constexpr auto make_division(division<L, R> l, T r) noexcept {
-  return make_division(l.lhs, make_multiplication(l.rhs, r));
+constexpr auto operator/(division<L, R> l, T r) noexcept {
+  return l.lhs / (l.rhs * r);
 }
 
 template <typename L, typename R>
-constexpr auto make_division(negation<L> l, negation<R> r) noexcept {
-  return make_division(l.arg, r.arg);
+constexpr auto operator/(negation<L> l, negation<R> r) noexcept {
+  return l.arg / r.arg;
 }
 
 template <typename L, typename R>
-constexpr auto make_division(exponential<L> l, exponential<R> r) noexcept {
-  return make_exponential(make_subtraction(l.arg, r.arg));
+constexpr auto operator/(exponential<L> l, exponential<R> r) noexcept {
+  return exp(l.arg - r.arg);
 }
 
 template <typename L, typename R>
@@ -935,64 +832,57 @@ struct division : expression<division<L, R>> {
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     if constexpr (is_constant_v<R>) {
-      return make_division(lhs.template derive<I>(), rhs);
+      return lhs.template derive<I>() / rhs;
     }
     else {
-      return make_division(
-          make_subtraction(make_multiplication(lhs.template derive<I>(), rhs),
-                           make_multiplication(lhs, rhs.template derive<I>())),
-          make_multiplication(rhs, rhs));
+      return (lhs.template derive<I>() * rhs) -
+             (lhs * rhs.template derive<I>()) / (rhs * rhs);
     }
   }
 };
 
 template <typename L, typename R>
-constexpr auto operator/(L l, R r) noexcept {
-  return make_division(as_expression(l), as_expression(r));
-}
-
-template <typename L, typename R>
-constexpr auto make_power(L l, R r) noexcept {
-  return power<L, R>(l, r);
+constexpr auto pow(L l, R r) noexcept {
+  return power(as_expression(l), as_expression(r));
 }
 
 template <typename T>
-constexpr auto make_power(zero, T) noexcept {
+constexpr auto pow(zero, T) noexcept {
   return zero{};
 }
 
 template <typename T>
-constexpr auto make_power(unity, T) noexcept {
+constexpr auto pow(unity, T) noexcept {
   return unity{};
 }
 
 template <typename T>
-constexpr auto make_power(T, zero) noexcept {
+constexpr auto pow(T, zero) noexcept {
   return zero{};
 }
 
 template <typename T>
-constexpr auto make_power(T x, unity) noexcept {
+constexpr auto pow(T x, unity) noexcept {
   return x;
 }
 
-constexpr auto make_power(zero, zero) noexcept {
+constexpr auto pow(zero, zero) noexcept {
   return unity{};
 }
 
 template <typename L, typename R, typename T>
-constexpr auto make_power(division<L, R> lhs, negation<T> rhs) noexcept {
-  return make_power(make_division(lhs.rhs, lhs.lhs), rhs.arg);
+constexpr auto pow(division<L, R> lhs, negation<T> rhs) noexcept {
+  return pow(lhs.rhs / lhs.lhs, rhs.arg);
 }
 
 template <typename L, typename R>
-constexpr auto make_power(exponential<L> lhs, R rhs) noexcept {
-  return make_exponential(make_multiplication(lhs.arg, rhs));
+constexpr auto pow(exponential<L> lhs, R rhs) noexcept {
+  return exp(operator*(lhs.arg, rhs));
 }
 
 template <typename L, typename R, typename T>
-constexpr auto make_power(power<L, R> lhs, T rhs) noexcept {
-  return make_power(lhs.lhs, make_multiplication(lhs.rhs, rhs));
+constexpr auto pow(power<L, R> lhs, T rhs) noexcept {
+  return pow(lhs.lhs, operator*(lhs.rhs, rhs));
 }
 
 template <typename L, typename R>
@@ -1008,54 +898,44 @@ struct power : expression<power<L, R>> {
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     if constexpr (is_constant_v<R>) {
-      return make_multiplication(
-          lhs.template derive<I>(),
-          make_multiplication(rhs,
-                              make_power(lhs, make_subtraction(rhs, unity{}))));
+      return lhs.template derive<I>() * rhs * pow(lhs, rhs - unity{});
     }
     else {
-      return make_multiplication(
-          *this, make_addition(make_division(make_multiplication(
-                                                 lhs.template derive<I>(), rhs),
-                                             lhs),
-                               make_multiplication(make_logarithm(lhs),
-                                                   rhs.template derive<I>())));
+      return *this * (lhs.template derive<I>() * rhs / lhs) +
+             (log(lhs) * rhs.template derive<I>());
     }
   }
 };
 
-template <typename L, typename R>
-constexpr auto pow(L l, R r) noexcept {
-  return make_power(as_expression(l), as_expression(r));
-}
-
+// Don't need `as_expression` here since `operator+` is only findable via adl
 template <typename T>
 constexpr auto operator+(T x) noexcept {
   return x;
 }
 
+// See `operator+`
 template <typename T>
-constexpr auto make_negation(T x) noexcept {
-  return negation<T>(x);
+constexpr auto operator-(T x) noexcept {
+  return negation(x);
 }
 
 template <typename T>
-constexpr auto make_negation(negation<T> x) noexcept {
+constexpr auto operator-(negation<T> x) noexcept {
   return x.arg;
 }
 
-constexpr auto make_negation(zero) noexcept {
+constexpr auto operator-(zero) noexcept {
   return zero{};
 }
 
 template <typename L, typename R>
-constexpr auto make_negation(multiplication<L, R> x) noexcept {
-  return make_multiplication(make_negation(x.lhs), x.rhs);
+constexpr auto operator-(multiplication<L, R> x) noexcept {
+  return -x.lhs * x.rhs;
 }
 
 template <typename L, typename R>
-constexpr auto make_negation(division<L, R> x) noexcept {
-  return make_division(make_negation(x.lhs), x.rhs);
+constexpr auto operator-(division<L, R> x) noexcept {
+  return -x.lhs / x.rhs;
 }
 
 template <typename T>
@@ -1069,14 +949,9 @@ struct negation : expression<negation<T>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return make_negation(arg.template derive<I>());
+    return -arg.template derive<I>();
   }
 };
-
-template <typename T>
-constexpr auto operator-(T x) noexcept {
-  return make_negation(x);
-}
 
 constexpr long parse_integral(const char* s, std::size_t n) noexcept {
   long res = 0;
