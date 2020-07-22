@@ -53,8 +53,6 @@ template <typename T>
 struct area_cosinus_hyperbolicus;
 template <typename T>
 struct area_tangens_hyperbolicus;
-template <typename T>
-constexpr auto operator-(T x) noexcept;
 
 template <typename T>
 inline constexpr bool is_constant_v = false;
@@ -498,7 +496,7 @@ struct arcus_cosinus : unary_function<arcus_cosinus<T>> {
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return -unity{} / sqrt(unity{} - arg * arg);
+    return -(unity{} / sqrt(unity{} - arg * arg));
   }
 };
 
