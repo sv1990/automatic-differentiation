@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 add_library(ad INTERFACE)
 add_library(ad::ad ALIAS ad)
-target_compile_features(ad INTERFACE cxx_std_17)
+target_compile_features(ad INTERFACE cxx_std_20)
 
 target_include_directories(
   ad

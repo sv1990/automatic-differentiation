@@ -57,20 +57,18 @@ struct area_tangens_hyperbolicus;
 template <typename T>
 inline constexpr bool is_constant_v = false;
 
-// Has to be a struct to enable use with `std::conjunction`
 template <typename T>
-struct is_variable : std::false_type {};
+inline constexpr bool is_variable_v = false;
 
 template <std::size_t N>
-struct is_variable<variable<N>> : std::true_type {};
-
-template <typename T>
-inline constexpr bool is_variable_v = is_variable<T>::value;
+inline constexpr bool is_variable_v<variable<N>> = true;
 
 template <typename Derived>
 struct expression {
-  template <typename... Ts,
-            std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
+  template <typename... Ts>
+  #ifndef __GNUC__
+  requires(is_variable_v<Ts>&&...)
+  #endif
   constexpr auto derive(Ts...) const noexcept {
     return derive<Ts::value...>();
   }
@@ -605,8 +603,7 @@ private:
   }
 };
 
-template <typename L, typename R,
-          std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
+template <typename L, typename R>
 constexpr auto operator+(L l, R r) noexcept {
   return addition(as_expression(l), as_expression(r));
 }
@@ -624,12 +621,12 @@ constexpr auto operator+(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 + N2>{};
 }
 
-template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
+template <typename T> requires (!is_static_constant_v<T>)
 constexpr auto operator+(zero, T x) noexcept {
   return as_expression(x);
 }
 
-template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
+template <typename T> requires (!is_static_constant_v<T>)
 constexpr auto operator+(T x, zero) noexcept {
   return as_expression(x);
 }
@@ -650,8 +647,7 @@ struct addition : expression<addition<L, R>> {
   }
 };
 
-template <typename L, typename R,
-          std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
+template <typename L, typename R>
 constexpr auto operator-(L l, R r) noexcept {
   return subtraction(as_expression(l), as_expression(r));
 }
@@ -669,12 +665,12 @@ constexpr auto operator-(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 - N2>{};
 }
 
-template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
+template <typename T> requires (!is_static_constant_v<T>)
 constexpr auto operator-(T x, zero) noexcept {
   return as_expression(x);
 }
 
-template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
+template <typename T> requires (!is_static_constant_v<T>)
 constexpr auto operator-(zero, T x) noexcept {
   return -x;
 }
@@ -713,8 +709,7 @@ struct multiplication : expression<multiplication<L, R>> {
   }
 };
 
-template <typename L, typename R,
-          std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
+template <typename L, typename R>
 constexpr auto operator*(L l, R r) noexcept {
   return multiplication(as_expression(l), as_expression(r));
 }
@@ -732,22 +727,22 @@ constexpr auto operator*(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 * N2>{};
 }
 
-template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
+template <typename T> requires (!is_static_constant_v<T>)
 constexpr auto operator*(T, zero) noexcept {
   return zero{};
 }
 
-template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
+template <typename T> requires (!is_static_constant_v<T>)
 constexpr auto operator*(zero, T) noexcept {
   return zero{};
 }
 
-template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
+template <typename T> requires (!is_static_constant_v<T>)
 constexpr auto operator*(T x, unity) noexcept {
   return as_expression(x);
 }
 
-template <typename T, std::enable_if_t<!is_static_constant_v<T>>* = nullptr>
+template <typename T> requires (!is_static_constant_v<T>)
 constexpr auto operator*(unity, T x) noexcept {
   return as_expression(x);
 }
@@ -762,27 +757,23 @@ constexpr auto operator*(exponential<L> l, exponential<R> r) noexcept {
   return exp(l.arg + r.arg);
 }
 
-template <typename L, typename R,
-          std::enable_if_t<!std::is_same_v<L, unity>>* = nullptr>
+template <typename L, typename R> requires (!std::is_same_v<L, unity>)
 constexpr auto operator*(L l, division<unity, R> r) noexcept {
   return l / r.rhs;
 }
 
-template <typename L, typename R,
-          std::enable_if_t<!std::is_same_v<R, unity>>* = nullptr>
+template <typename L, typename R> requires (!std::is_same_v<R, unity>)
 constexpr auto operator*(division<unity, L> l, R r) noexcept {
   return r / l.rhs;
 }
 
-template <typename L, typename R,
-          std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
+template <typename L, typename R>
 constexpr auto operator/(L l, R r) noexcept {
   return division(as_expression(l), as_expression(r));
 }
 
 // TODO: Overload for static_constant?
-template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+template <typename L, typename R> requires (is_constant_v<L> && is_constant_v<R>)
 constexpr auto operator/(L l, R r) noexcept {
   return runtime_constant{l.value() / r.value()};
 }
