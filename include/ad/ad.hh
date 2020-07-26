@@ -66,9 +66,10 @@ inline constexpr bool is_variable_v<variable<N>> = true;
 template <typename Derived>
 struct expression {
   template <typename... Ts>
-  #ifndef __GNUC__
+#if defined(__clang__) || !defined(__GNUC__) || __GNUC__ > 10 ||               \
+    (__GNUC__ == 10 && __GNUC_MINOR__ > 1)
   requires(is_variable_v<Ts>&&...)
-  #endif
+#endif
   constexpr auto derive(Ts...) const noexcept {
     return derive<Ts::value...>();
   }
@@ -621,12 +622,14 @@ constexpr auto operator+(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 + N2>{};
 }
 
-template <typename T> requires (!is_static_constant_v<T>)
+template <typename T>
+  requires(!is_static_constant_v<T>)
 constexpr auto operator+(zero, T x) noexcept {
   return as_expression(x);
 }
 
-template <typename T> requires (!is_static_constant_v<T>)
+template <typename T>
+  requires(!is_static_constant_v<T>)
 constexpr auto operator+(T x, zero) noexcept {
   return as_expression(x);
 }
@@ -665,12 +668,14 @@ constexpr auto operator-(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 - N2>{};
 }
 
-template <typename T> requires (!is_static_constant_v<T>)
+template <typename T>
+  requires(!is_static_constant_v<T>)
 constexpr auto operator-(T x, zero) noexcept {
   return as_expression(x);
 }
 
-template <typename T> requires (!is_static_constant_v<T>)
+template <typename T>
+  requires(!is_static_constant_v<T>)
 constexpr auto operator-(zero, T x) noexcept {
   return -x;
 }
@@ -727,22 +732,26 @@ constexpr auto operator*(static_constant<N1>, static_constant<N2>) noexcept {
   return static_constant<N1 * N2>{};
 }
 
-template <typename T> requires (!is_static_constant_v<T>)
+template <typename T>
+  requires(!is_static_constant_v<T>)
 constexpr auto operator*(T, zero) noexcept {
   return zero{};
 }
 
-template <typename T> requires (!is_static_constant_v<T>)
+template <typename T>
+  requires(!is_static_constant_v<T>)
 constexpr auto operator*(zero, T) noexcept {
   return zero{};
 }
 
-template <typename T> requires (!is_static_constant_v<T>)
+template <typename T>
+  requires(!is_static_constant_v<T>)
 constexpr auto operator*(T x, unity) noexcept {
   return as_expression(x);
 }
 
-template <typename T> requires (!is_static_constant_v<T>)
+template <typename T>
+  requires(!is_static_constant_v<T>)
 constexpr auto operator*(unity, T x) noexcept {
   return as_expression(x);
 }
@@ -757,12 +766,14 @@ constexpr auto operator*(exponential<L> l, exponential<R> r) noexcept {
   return exp(l.arg + r.arg);
 }
 
-template <typename L, typename R> requires (!std::is_same_v<L, unity>)
+template <typename L, typename R>
+  requires(!std::is_same_v<L, unity>)
 constexpr auto operator*(L l, division<unity, R> r) noexcept {
   return l / r.rhs;
 }
 
-template <typename L, typename R> requires (!std::is_same_v<R, unity>)
+template <typename L, typename R>
+  requires(!std::is_same_v<R, unity>)
 constexpr auto operator*(division<unity, L> l, R r) noexcept {
   return r / l.rhs;
 }
@@ -773,7 +784,8 @@ constexpr auto operator/(L l, R r) noexcept {
 }
 
 // TODO: Overload for static_constant?
-template <typename L, typename R> requires (is_constant_v<L> && is_constant_v<R>)
+template <typename L, typename R>
+  requires(is_constant_v<L>&& is_constant_v<R>)
 constexpr auto operator/(L l, R r) noexcept {
   return runtime_constant{l.value() / r.value()};
 }
