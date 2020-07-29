@@ -57,15 +57,14 @@ struct area_tangens_hyperbolicus;
 template <typename T>
 inline constexpr bool is_constant_v = false;
 
-// Has to be a struct to enable use with `std::conjunction`
 template <typename T>
-struct is_variable : std::false_type {};
+inline constexpr bool is_variable_v = false;
 
 template <std::size_t N>
-struct is_variable<variable<N>> : std::true_type {};
+inline constexpr bool is_variable_v<variable<N>> = true;
 
 template <typename T>
-inline constexpr bool is_variable_v = is_variable<T>::value;
+struct is_variable : std::bool_constant<is_variable_v<T>> {};
 
 template <typename Derived>
 struct expression {
