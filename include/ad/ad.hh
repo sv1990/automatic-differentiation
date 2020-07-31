@@ -611,9 +611,7 @@ constexpr auto operator+(L l, R r) noexcept {
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
-                           (!is_static_constant_v<L> ||
-                            !is_static_constant_v<R>)>* = nullptr>
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr auto operator+(L l, R r) noexcept {
   return runtime_constant{l.value() + r.value()};
 }
@@ -656,9 +654,7 @@ constexpr auto operator-(L l, R r) noexcept {
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
-                           (!is_static_constant_v<L> ||
-                            !is_static_constant_v<R>)>* = nullptr>
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr auto operator-(L l, R r) noexcept {
   return runtime_constant{l.value() - r.value()};
 }
@@ -719,9 +715,7 @@ constexpr auto operator*(L l, R r) noexcept {
 }
 
 template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R> &&
-                           (!is_static_constant_v<L> ||
-                            !is_static_constant_v<R>)>* = nullptr>
+          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
   return runtime_constant{l.value() * r.value()};
 }
