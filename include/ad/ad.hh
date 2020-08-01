@@ -66,10 +66,7 @@ inline constexpr bool is_variable_v<variable<N>> = true;
 template <typename Derived>
 struct expression {
   template <typename... Ts>
-#if defined(__clang__) || !defined(__GNUC__) || __GNUC__ > 10 ||               \
-    (__GNUC__ == 10 && __GNUC_MINOR__ > 1)
   requires(is_variable_v<Ts>&&...)
-#endif
   constexpr auto derive(Ts...) const noexcept {
     return derive<Ts::value...>();
   }
