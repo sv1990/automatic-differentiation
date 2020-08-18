@@ -704,7 +704,7 @@ struct multiplication : expression<multiplication<L, R>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return (lhs.template derive<I>() * rhs) + (lhs * rhs.template derive<I>());
+    return lhs.template derive<I>() * rhs + lhs * rhs.template derive<I>();
   }
 };
 
