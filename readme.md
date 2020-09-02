@@ -45,7 +45,7 @@ It is also possible to use the functions
 ### Multidimensional
 
 ```C++
-// Define a variable names
+// Define variable names
 constexpr auto x = ad::_0;
 constexpr auto y = ad::_1;
 

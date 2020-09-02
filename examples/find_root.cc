@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-// Fond root using Newton method https://en.wikipedia.org/wiki/Newton%27s_method
+// Find root using Newton method https://en.wikipedia.org/wiki/Newton%27s_method
 
 template <typename F>
 constexpr double find_root(F f, double start = 1.0, double eps = 1e-6) {
