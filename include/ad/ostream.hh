@@ -18,7 +18,7 @@ std::string concat(const Ts&... xs) {
 
 template <std::size_t N>
 struct format_variable {
-  static inline std::string rep = detail::concat("x", N);
+  static inline const std::string rep = detail::concat("x", N);
 };
 
 namespace detail {
