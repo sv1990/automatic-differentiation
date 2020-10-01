@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.14)
 
 project(AutomaticDifferentiation CXX)
 
-set(CMAKE_BUILD_TYPE Debug)
-
 add_library(ad INTERFACE)
 add_library(ad::ad ALIAS ad)
 target_compile_features(ad INTERFACE cxx_std_17)
