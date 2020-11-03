@@ -134,9 +134,11 @@ struct unary_function : expression<unary_function<Derived>> {
   }
 };
 
+// clang-format off
 template <typename T>
-inline constexpr bool is_expression_v = std::is_base_of_v<expression<T>, T> ||
-                                        std::is_base_of_v<unary_function<T>, T>;
+inline constexpr bool is_expression_v = std::is_base_of_v<expression<T>, T> 
+                                        || std::is_base_of_v<unary_function<T>, T>;
+// clang-format on
 
 template <long N>
 struct static_constant : expression<static_constant<N>> {
@@ -826,8 +828,8 @@ struct division : expression<division<L, R>> {
       return lhs.template derive<I>() / rhs;
     }
     else {
-      return (lhs.template derive<I>() * rhs) -
-             (lhs * rhs.template derive<I>()) / (rhs * rhs);
+      return (lhs.template derive<I>() * rhs)
+             - (lhs * rhs.template derive<I>()) / (rhs * rhs);
     }
   }
 };
@@ -892,8 +894,8 @@ struct power : expression<power<L, R>> {
       return lhs.template derive<I>() * rhs * pow(lhs, rhs - unity{});
     }
     else {
-      return *this * (lhs.template derive<I>() * rhs / lhs) +
-             (log(lhs) * rhs.template derive<I>());
+      return *this * (lhs.template derive<I>() * rhs / lhs)
+             + (log(lhs) * rhs.template derive<I>());
     }
   }
 };
