@@ -906,7 +906,7 @@ constexpr auto operator+(T x) noexcept {
   return x;
 }
 
-// See `operator+`
+// Don't need `as_expression` here since `operator-` is only findable via adl
 template <typename T>
 constexpr auto operator-(T x) noexcept {
   return negation(x);
