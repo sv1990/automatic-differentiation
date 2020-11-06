@@ -56,4 +56,7 @@ int main() {
   assert(ad::to_string(1_c - (x + 1_c)) == "1 - (x0 + 1)");
   assert(ad::to_string(1_c + (x + 1_c)) == "1 + x0 + 1");
   assert(ad::to_string(2_c * (x * 2_c)) == "2 * x0 * 2");
+  assert(ad::to_string(-ad::exp(x)) == "-exp(x0)");
+  assert(ad::to_string(-(x + 2)) == "-(x0 + 2)");
+  assert(ad::to_string(-(x - 2)) == "-(x0 - 2)");
 }

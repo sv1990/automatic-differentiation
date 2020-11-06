@@ -36,6 +36,24 @@ struct is_operator {
 is_operator<addition> is_addition;
 is_operator<multiplication> is_multiplication;
 
+template <typename T>
+inline constexpr bool is_binary_operator_v = false;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<addition<L, R>> = true;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<subtraction<L, R>> = true;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<multiplication<L, R>> = true;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<division<L, R>> = true;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<power<L, R>> = true;
+
 struct print_impl {
   template <typename T, std::enable_if_t<is_constant_v<T>>* = nullptr>
   static void print(std::ostream& os, const T& x) {
@@ -189,45 +207,17 @@ public:
     print_function(os, "sqrt", x);
   }
 
-private:
-  struct print_negate {
-    template <typename T>
-    static void print_with_brackets(std::ostream& os, const T& x) {
-      os << "-(";
-      print(os, x);
-      os << ')';
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const addition<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const subtraction<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const multiplication<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const division<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const power<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename T>
-    static void do_print(std::ostream& os, const T& x) {
-      os << '-';
-      print(os, x);
-    }
-  };
-
-public:
   template <typename T>
   static void print(std::ostream& os, const negation<T>& x) {
-    print_negate::do_print(os, x.arg);
+    if constexpr (detail::is_binary_operator_v<std::decay_t<decltype(x.arg)>>) {
+      os << "-(";
+      print(os, x.arg);
+      os << ')';
+    }
+    else {
+      os << '-';
+      print(os, x.arg);
+    }
   }
 };
 
