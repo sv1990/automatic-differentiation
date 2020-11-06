@@ -74,9 +74,9 @@ private:
 
     const bool lhs_needs_brackets = precedence(x) > precedence(lhs);
     const bool rhs_needs_brackets =
-        precedence(x) > precedence(rhs)               //
-        || (precedence(x) == precedence(rhs)          //
-            && !((is_addition(x) && is_addition(rhs)) //
+        precedence(x) > precedence(rhs)
+        || (precedence(x) == precedence(rhs)
+            && !((is_addition(x) && is_addition(rhs))
                  || (is_multiplication(x) && is_multiplication(rhs))));
 
     print_with_brackets(os, lhs_needs_brackets, lhs);
@@ -85,26 +85,26 @@ private:
   }
 
   template <typename L, typename R>
-  static int precedence(const addition<L, R>&) {
+  static constexpr int precedence(const addition<L, R>&) {
     return 1;
   }
   template <typename L, typename R>
-  static int precedence(const subtraction<L, R>&) {
+  static constexpr int precedence(const subtraction<L, R>&) {
     return 1;
   }
   template <typename L, typename R>
-  static int precedence(const multiplication<L, R>&) {
+  static constexpr int precedence(const multiplication<L, R>&) {
     return 2;
   }
   template <typename L, typename R>
-  static int precedence(const division<L, R>&) {
+  static constexpr int precedence(const division<L, R>&) {
     return 2;
   }
   template <typename L, typename R>
-  static int precedence(const power<L, R>&) {
+  static constexpr int precedence(const power<L, R>&) {
     return 3;
   }
-  static int precedence(...) { return 4; }
+  static constexpr int precedence(...) { return 4; }
 
 public:
   template <typename L, typename R>
