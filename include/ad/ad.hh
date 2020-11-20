@@ -625,9 +625,9 @@ constexpr auto operator+(L l, R r) noexcept {
   return addition(as_expression(l), as_expression(r));
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
-constexpr auto operator+(L l, R r) noexcept {
+template <typename L, typename R>
+requires(is_constant_v<L>&& is_constant_v<R>) constexpr auto
+operator+(L l, R r) noexcept {
   return runtime_constant{l.value() + r.value()};
 }
 
@@ -670,9 +670,9 @@ constexpr auto operator-(L l, R r) noexcept {
   return subtraction(as_expression(l), as_expression(r));
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
-constexpr auto operator-(L l, R r) noexcept {
+template <typename L, typename R>
+requires(is_constant_v<L>&& is_constant_v<R>) constexpr auto
+operator-(L l, R r) noexcept {
   return runtime_constant{l.value() - r.value()};
 }
 
@@ -734,9 +734,9 @@ constexpr auto operator*(L l, R r) noexcept {
   return multiplication(as_expression(l), as_expression(r));
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
-constexpr auto operator*(L l, R r) noexcept {
+template <typename L, typename R>
+requires(is_constant_v<L>&& is_constant_v<R>) constexpr auto
+operator*(L l, R r) noexcept {
   return runtime_constant{l.value() * r.value()};
 }
 
