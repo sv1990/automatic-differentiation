@@ -946,11 +946,11 @@ struct negation : expression<negation<T>> {
   }
 };
 
-constexpr long parse_integral(const char* s, std::size_t n) noexcept {
+constexpr long parse_integral(const char* s) noexcept {
   long res = 0;
-  for (std::size_t i = 0; i < n; ++i) {
+  for (; *s; ++s) {
     res *= 10;
-    res += s[i] - '0';
+    res += *s - '0';
   }
   return res;
 }
@@ -963,8 +963,8 @@ constexpr auto operator""_c(long double x) noexcept {
 
 template <char... cs>
 constexpr auto operator""_c() noexcept {
-  constexpr const char s[] = {cs...};
-  return detail::static_constant<detail::parse_integral(s, sizeof...(cs))>{};
+  constexpr const char s[] = {cs..., 0};
+  return detail::static_constant<detail::parse_integral(s)>{};
 }
 } // namespace literals
 
