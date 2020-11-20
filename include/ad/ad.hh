@@ -1,7 +1,6 @@
 #ifndef AUTOMATICDIFFERENTIATION_AD_HH_1574234361739842350_
 #define AUTOMATICDIFFERENTIATION_AD_HH_1574234361739842350_
 
-#include <tuple>
 #include <type_traits>
 
 #include <cmath>
@@ -202,14 +201,15 @@ constexpr auto as_expression(T x) noexcept {
 }
 
 template <std::size_t I, typename... Ts>
-constexpr auto get(Ts... xs) noexcept {
+constexpr double get(Ts... xs) noexcept {
   if constexpr (I >= sizeof...(Ts)) {
     static_assert(dependent_false<Ts...>,
                   "Too few arguments passed! Maybe you meant to use ad::_0 "
                   "instead of ad::_1.");
   }
   else {
-    return std::get<I>(std::make_tuple(xs...));
+    double arr[] = {static_cast<double>(xs)...};
+    return arr[I];
   }
 }
 
@@ -218,7 +218,7 @@ struct variable : expression<variable<N>> {
   using expression<variable>::derive;
   template <typename... Ts>
   constexpr double operator()(Ts... xs) const noexcept {
-    return static_cast<double>(get<N>(xs...));
+    return get<N>(xs...);
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
