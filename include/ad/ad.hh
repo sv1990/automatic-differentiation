@@ -143,7 +143,8 @@ template <long N>
 struct static_constant : expression<static_constant<N>> {
   using expression<static_constant>::derive;
   constexpr double value() const noexcept { return static_cast<double>(N); }
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts...) const noexcept {
     return value();
   }
@@ -170,7 +171,8 @@ struct runtime_constant : expression<runtime_constant> {
   double _value;
   constexpr explicit runtime_constant(double value) noexcept : _value(value) {}
   constexpr double value() const noexcept { return _value; }
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts...) const noexcept {
     return _value;
   }
@@ -216,7 +218,8 @@ constexpr double get(Ts... xs) noexcept {
 template <std::size_t N>
 struct variable : expression<variable<N>> {
   using expression<variable>::derive;
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return get<N>(xs...);
   }
@@ -248,7 +251,8 @@ struct exponential : unary_function<exponential<T>> {
   friend struct unary_function<exponential<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit exponential(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::exp(arg(xs...));
   }
@@ -268,7 +272,8 @@ struct square_root : unary_function<square_root<T>> {
   friend struct unary_function<square_root<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit square_root(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::sqrt(arg(xs...));
   }
@@ -295,7 +300,8 @@ struct logarithm : unary_function<logarithm<T>> {
   friend struct unary_function<logarithm<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit logarithm(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::log(arg(xs...));
   }
@@ -319,7 +325,8 @@ struct sinus : unary_function<sinus<T>> {
   friend struct unary_function<sinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit sinus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::sin(arg(xs...));
   }
@@ -344,7 +351,8 @@ struct cosinus : unary_function<cosinus<T>> {
   friend struct unary_function<cosinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit cosinus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::cos(arg(xs...));
   }
@@ -368,7 +376,8 @@ struct tangens : unary_function<tangens<T>> {
   friend struct unary_function<tangens<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit tangens(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::tan(arg(xs...));
   }
@@ -393,7 +402,8 @@ struct sinus_hyperbolicus : unary_function<sinus_hyperbolicus<T>> {
   friend struct unary_function<sinus_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit sinus_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::sinh(arg(xs...));
   }
@@ -416,7 +426,8 @@ struct cosinus_hyperbolicus : unary_function<cosinus_hyperbolicus<T>> {
   friend struct unary_function<cosinus_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit cosinus_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::cosh(arg(xs...));
   }
@@ -440,7 +451,8 @@ struct tangens_hyperbolicus : unary_function<tangens_hyperbolicus<T>> {
   friend struct unary_function<tangens_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit tangens_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::tanh(arg(xs...));
   }
@@ -465,7 +477,8 @@ struct arcus_sinus : unary_function<arcus_sinus<T>> {
   friend struct unary_function<arcus_sinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit arcus_sinus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::asin(arg(xs...));
   }
@@ -490,7 +503,8 @@ struct arcus_cosinus : unary_function<arcus_cosinus<T>> {
   friend struct unary_function<arcus_cosinus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit arcus_cosinus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::acos(arg(xs...));
   }
@@ -515,7 +529,8 @@ struct arcus_tangens : unary_function<arcus_tangens<T>> {
   friend struct unary_function<arcus_tangens<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit arcus_tangens(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::atan(arg(xs...));
   }
@@ -540,7 +555,8 @@ struct area_sinus_hyperbolicus : unary_function<area_sinus_hyperbolicus<T>> {
   friend struct unary_function<area_sinus_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit area_sinus_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::asinh(arg(xs...));
   }
@@ -567,7 +583,8 @@ struct area_cosinus_hyperbolicus
   friend struct unary_function<area_cosinus_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit area_cosinus_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::acosh(arg(xs...));
   }
@@ -595,7 +612,8 @@ struct area_tangens_hyperbolicus
   friend struct unary_function<area_tangens_hyperbolicus<T>>;
   [[no_unique_address]] T arg;
   constexpr explicit area_tangens_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::atanh(arg(xs...));
   }
@@ -639,7 +657,8 @@ struct addition : expression<addition<L, R>> {
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr explicit addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) + rhs(xs...);
   }
@@ -683,7 +702,8 @@ struct subtraction : expression<subtraction<L, R>> {
   [[no_unique_address]] R rhs;
   constexpr explicit subtraction(L lhs_, R rhs_) noexcept
       : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) - rhs(xs...);
   }
@@ -700,7 +720,8 @@ struct multiplication : expression<multiplication<L, R>> {
   [[no_unique_address]] R rhs;
   constexpr explicit multiplication(L lhs_, R rhs_) noexcept
       : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) * rhs(xs...);
   }
@@ -818,7 +839,8 @@ struct division : expression<division<L, R>> {
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr explicit division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) / rhs(xs...);
   }
@@ -884,7 +906,8 @@ struct power : expression<power<L, R>> {
   [[no_unique_address]] L lhs;
   [[no_unique_address]] R rhs;
   constexpr explicit power(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::pow(lhs(xs...), rhs(xs...));
   }
@@ -936,7 +959,8 @@ struct negation : expression<negation<T>> {
   using expression<negation>::derive;
   [[no_unique_address]] T arg;
   constexpr explicit negation(T x) noexcept : arg(x) {}
-  template <typename... Ts>
+  template <typename... Ts, std::enable_if_t<std::conjunction_v<
+                                std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return -arg(xs...);
   }
