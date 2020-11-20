@@ -18,7 +18,7 @@ std::string concat(const Ts&... xs) {
 
 template <std::size_t N>
 struct format_variable {
-  static inline std::string rep = detail::concat("x", N);
+  static inline const std::string rep = detail::concat("x", N);
 };
 
 namespace detail {
@@ -35,6 +35,24 @@ struct is_operator {
 };
 is_operator<addition> is_addition;
 is_operator<multiplication> is_multiplication;
+
+template <typename T>
+inline constexpr bool is_binary_operator_v = false;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<addition<L, R>> = true;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<subtraction<L, R>> = true;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<multiplication<L, R>> = true;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<division<L, R>> = true;
+
+template <typename L, typename R>
+inline constexpr bool is_binary_operator_v<power<L, R>> = true;
 
 struct print_impl {
   template <typename T, std::enable_if_t<is_constant_v<T>>* = nullptr>
@@ -74,9 +92,9 @@ private:
 
     const bool lhs_needs_brackets = precedence(x) > precedence(lhs);
     const bool rhs_needs_brackets =
-        precedence(x) > precedence(rhs)               //
-        || (precedence(x) == precedence(rhs)          //
-            && !((is_addition(x) && is_addition(rhs)) //
+        precedence(x) > precedence(rhs)
+        || (precedence(x) == precedence(rhs)
+            && !((is_addition(x) && is_addition(rhs))
                  || (is_multiplication(x) && is_multiplication(rhs))));
 
     print_with_brackets(os, lhs_needs_brackets, lhs);
@@ -85,26 +103,26 @@ private:
   }
 
   template <typename L, typename R>
-  static int precedence(const addition<L, R>&) {
+  static constexpr int precedence(const addition<L, R>&) {
     return 1;
   }
   template <typename L, typename R>
-  static int precedence(const subtraction<L, R>&) {
+  static constexpr int precedence(const subtraction<L, R>&) {
     return 1;
   }
   template <typename L, typename R>
-  static int precedence(const multiplication<L, R>&) {
+  static constexpr int precedence(const multiplication<L, R>&) {
     return 2;
   }
   template <typename L, typename R>
-  static int precedence(const division<L, R>&) {
+  static constexpr int precedence(const division<L, R>&) {
     return 2;
   }
   template <typename L, typename R>
-  static int precedence(const power<L, R>&) {
+  static constexpr int precedence(const power<L, R>&) {
     return 3;
   }
-  static int precedence(...) { return 4; }
+  static constexpr int precedence(...) { return 4; }
 
 public:
   template <typename L, typename R>
@@ -189,45 +207,17 @@ public:
     print_function(os, "sqrt", x);
   }
 
-private:
-  struct print_negate {
-    template <typename T>
-    static void print_with_brackets(std::ostream& os, const T& x) {
-      os << "-(";
-      print(os, x);
-      os << ')';
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const addition<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const subtraction<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const multiplication<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const division<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename L, typename R>
-    static void do_print(std::ostream& os, const power<L, R>& x) {
-      print_with_brackets(os, x);
-    }
-    template <typename T>
-    static void do_print(std::ostream& os, const T& x) {
-      os << '-';
-      print(os, x);
-    }
-  };
-
-public:
   template <typename T>
   static void print(std::ostream& os, const negation<T>& x) {
-    print_negate::do_print(os, x.arg);
+    if constexpr (detail::is_binary_operator_v<std::decay_t<decltype(x.arg)>>) {
+      os << "-(";
+      print(os, x.arg);
+      os << ')';
+    }
+    else {
+      os << '-';
+      print(os, x.arg);
+    }
   }
 };
 

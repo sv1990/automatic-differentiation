@@ -5,7 +5,7 @@
 
 template <>
 struct ad::format_variable<0> {
-  static inline std::string rep = "x";
+  static inline const std::string rep = "x";
 };
 
 int main() {
