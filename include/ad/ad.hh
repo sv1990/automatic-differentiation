@@ -881,12 +881,12 @@ constexpr auto pow(division<L, R> lhs, negation<T> rhs) noexcept {
 
 template <typename L, typename R>
 constexpr auto pow(exponential<L> lhs, R rhs) noexcept {
-  return exp(operator*(lhs.arg, rhs));
+  return exp(lhs.arg * rhs);
 }
 
 template <typename L, typename R, typename T>
 constexpr auto pow(power<L, R> lhs, T rhs) noexcept {
-  return pow(lhs.lhs, operator*(lhs.rhs, rhs));
+  return pow(lhs.lhs, lhs.rhs * rhs);
 }
 
 template <typename L, typename R>
