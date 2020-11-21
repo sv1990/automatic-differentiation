@@ -54,9 +54,11 @@ inline constexpr bool is_binary_operator_v<division<L, R>> = true;
 template <typename L, typename R>
 inline constexpr bool is_binary_operator_v<power<L, R>> = true;
 
+template <typename T>
+concept constant = is_constant_v<T>;
+
 struct print_impl {
-  template <typename T, std::enable_if_t<is_constant_v<T>>* = nullptr>
-  static void print(std::ostream& os, const T& x) {
+  static void print(std::ostream& os, const constant auto& x) {
     os << x.value();
   }
   template <std::size_t N>
@@ -221,15 +223,16 @@ public:
   }
 };
 
-template <typename E, std::enable_if_t<is_expression_v<E>>* = nullptr>
-std::ostream& operator<<(std::ostream& os, const E& x) {
+template <typename T>
+concept expression_like = is_expression_v<T>;
+
+std::ostream& operator<<(std::ostream& os, const expression_like auto& x) {
   print_impl::print(os, x);
   return os;
 }
 } // namespace detail
 
-template <typename E, std::enable_if_t<detail::is_expression_v<E>>* = nullptr>
-std::string to_string(const E& x) {
+std::string to_string(const detail::expression_like auto& x) {
   std::ostringstream oss;
   oss << x;
   return std::move(oss).str();
