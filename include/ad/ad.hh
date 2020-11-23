@@ -124,6 +124,10 @@ struct expression {
     }
   }
 #endif
+
+private:
+  constexpr expression(){};
+  friend ConcreteExpression;
 };
 
 template <typename ConcreteFunction>
@@ -134,6 +138,10 @@ struct unary_function : expression<unary_function<ConcreteFunction>> {
     const auto& function = static_cast<const ConcreteFunction&>(*this);
     return function.arg.template derive<I>() * function.derive_outer();
   }
+
+private:
+  constexpr unary_function(){};
+  friend ConcreteFunction;
 };
 
 // clang-format off
@@ -160,6 +168,8 @@ struct static_constant : expression<static_constant<N>> {
   constexpr auto derive() const noexcept {
     return static_constant<0>{};
   }
+
+  constexpr static_constant(){};
 };
 
 template <long N>
