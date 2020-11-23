@@ -65,7 +65,7 @@ inline constexpr bool is_variable_v<variable<N>> = true;
 template <typename T>
 struct is_variable : std::bool_constant<is_variable_v<T>> {};
 
-template <typename Derived>
+template <typename ConcreteExpression>
 struct expression {
   template <typename... Ts,
             std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
@@ -77,14 +77,14 @@ struct expression {
   // https://www.reddit.com/r/cpp_questions/comments/ev4657/possible_bug_in_clangs_template_lookup/
   template <std::size_t I, std::size_t... Is>
   constexpr auto derive_helper() const noexcept {
-    const Derived& derived = static_cast<const Derived&>(*this);
+    const auto& expr = static_cast<const ConcreteExpression&>(*this);
     if constexpr (sizeof...(Is) == 1) {
-      return derived            //
+      return expr               //
           .template derive<I>() //
           .template derive<Is...>();
     }
     else {
-      return derived            //
+      return expr               //
           .template derive<I>() //
           .template derive_helper<Is...>();
     }
@@ -92,17 +92,17 @@ struct expression {
 
   template <std::size_t I, std::size_t... Is>
   constexpr auto derive() const noexcept {
-    const Derived& derived = static_cast<const Derived&>(*this);
+    const auto& expr = static_cast<const ConcreteExpression&>(*this);
     if constexpr (sizeof...(Is) == 0) {
-      return derived.template derive<I>();
+      return expr.template derive<I>();
     }
     else if constexpr (sizeof...(Is) == 1) {
-      return derived            //
+      return expr               //
           .template derive<I>() //
           .template derive<Is...>();
     }
     else {
-      return derived            //
+      return expr               //
           .template derive<I>() //
           .template derive_helper<Is...>();
     }
@@ -110,26 +110,26 @@ struct expression {
 #else
   template <std::size_t I, std::size_t... Is>
   constexpr auto derive() const noexcept {
-    const Derived& derived = static_cast<const Derived&>(*this);
+    const auto& expr = static_cast<const ConcreteExpression&>(*this);
     if constexpr (sizeof...(Is) > 0) {
-      return derived            //
+      return expr               //
           .template derive<I>() //
           .template derive<Is...>();
     }
     else {
-      return derived.template derive<I>();
+      return expr.template derive<I>();
     }
   }
 #endif
 };
 
-template <typename Derived>
-struct unary_function : expression<unary_function<Derived>> {
+template <typename ConcreteFunction>
+struct unary_function : expression<unary_function<ConcreteFunction>> {
   using expression<unary_function>::derive;
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    const Derived& derived = static_cast<const Derived&>(*this);
-    return derived.arg.template derive<I>() * derived.derive_outer();
+    const auto& function = static_cast<const ConcreteFunction&>(*this);
+    return function.arg.template derive<I>() * function.derive_outer();
   }
 };
 
