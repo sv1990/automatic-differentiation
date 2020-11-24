@@ -123,7 +123,7 @@ struct expression {
 #endif
 
 private:
-  constexpr expression(){};
+  constexpr expression() = default;
   friend ConcreteExpression;
 };
 
@@ -137,7 +137,7 @@ struct unary_function : expression<unary_function<ConcreteFunction>> {
   }
 
 private:
-  constexpr unary_function(){};
+  constexpr unary_function() = default;
   friend ConcreteFunction;
 };
 
@@ -150,6 +150,7 @@ inline constexpr bool is_expression_v = std::is_base_of_v<expression<T>, T>
 template <long N>
 struct static_constant : expression<static_constant<N>> {
   using expression<static_constant>::derive;
+  constexpr static_constant() = default;
   constexpr double value() const noexcept { return static_cast<double>(N); }
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -160,8 +161,6 @@ struct static_constant : expression<static_constant<N>> {
   constexpr auto derive() const noexcept {
     return static_constant<0>{};
   }
-
-  constexpr static_constant(){};
 };
 
 template <long N>
