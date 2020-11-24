@@ -126,7 +126,7 @@ struct expression {
 #endif
 
 private:
-  constexpr expression(){};
+  constexpr expression() = default;
   friend ConcreteExpression;
 };
 
@@ -140,7 +140,7 @@ struct unary_function : expression<unary_function<ConcreteFunction>> {
   }
 
 private:
-  constexpr unary_function(){};
+  constexpr unary_function() = default;
   friend ConcreteFunction;
 };
 
@@ -160,6 +160,7 @@ concept convertible_to = std::is_convertible_v<From, To> //
 template <long N>
 struct static_constant : expression<static_constant<N>> {
   using expression<static_constant>::derive;
+  constexpr static_constant() = default;
   constexpr double value() const noexcept { return static_cast<double>(N); }
   constexpr double operator()(convertible_to<double> auto...) const noexcept {
     return value();
@@ -168,8 +169,6 @@ struct static_constant : expression<static_constant<N>> {
   constexpr auto derive() const noexcept {
     return static_constant<0>{};
   }
-
-  constexpr static_constant(){};
 };
 
 template <long N>
