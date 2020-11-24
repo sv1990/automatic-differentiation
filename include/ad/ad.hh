@@ -591,7 +591,7 @@ struct area_cosinus_hyperbolicus
 
 private:
   constexpr auto derive_outer() const noexcept {
-    return unity{} / sqrt(arg - unity{}) * sqrt(unity{} + arg);
+    return unity{} / (sqrt(arg - unity{}) * sqrt(unity{} + arg));
   }
 };
 
