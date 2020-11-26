@@ -77,7 +77,6 @@ struct expression : expression_base {
 #if __clang__
   // workaround for
   // https://www.reddit.com/r/cpp_questions/comments/ev4657/possible_bug_in_clangs_template_lookup/
-private:
   template <std::size_t I, std::size_t... Is>
   constexpr auto derive_helper() const noexcept {
     const auto& expr = static_cast<const ConcreteExpression&>(*this);
@@ -93,7 +92,6 @@ private:
     }
   }
 
-public:
   template <std::size_t I, std::size_t... Is>
   constexpr auto derive() const noexcept {
     const auto& expr = static_cast<const ConcreteExpression&>(*this);
