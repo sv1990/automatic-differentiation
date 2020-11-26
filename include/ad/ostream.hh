@@ -55,6 +55,7 @@ template <typename L, typename R>
 inline constexpr bool is_binary_operator_v<power<L, R>> = true;
 
 struct print_impl {
+  static void print(std::ostream& os, special_constant x) { os << x.rep; }
   template <typename T, std::enable_if_t<is_constant_v<T>>* = nullptr>
   static void print(std::ostream& os, const T& x) {
     os << x.value();

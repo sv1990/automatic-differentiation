@@ -65,8 +65,10 @@ inline constexpr bool is_variable_v<variable<N>> = true;
 template <typename T>
 struct is_variable : std::bool_constant<is_variable_v<T>> {};
 
+struct expression_base {};
+
 template <typename ConcreteExpression>
-struct expression {
+struct expression : expression_base {
   template <typename... Ts,
             std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
   constexpr auto derive(Ts...) const noexcept {
@@ -143,11 +145,8 @@ private:
   friend ConcreteFunction;
 };
 
-// clang-format off
 template <typename T>
-inline constexpr bool is_expression_v = std::is_base_of_v<expression<T>, T> 
-                                        || std::is_base_of_v<unary_function<T>, T>;
-// clang-format on
+inline constexpr bool is_expression_v = std::is_base_of_v<expression_base, T>;
 
 template <long N>
 struct static_constant : expression<static_constant<N>> {
@@ -195,6 +194,15 @@ struct runtime_constant : expression<runtime_constant> {
 
 template <>
 inline constexpr bool is_constant_v<runtime_constant> = true;
+
+struct special_constant : runtime_constant {
+  const char* rep;
+  constexpr special_constant(const char* rep_, double value)
+      : runtime_constant(value), rep(rep_) {}
+};
+
+inline constexpr special_constant e("e", M_E);
+inline constexpr special_constant pi("pi", M_PI);
 
 template <typename...>
 inline constexpr bool dependent_false = false;
@@ -1006,6 +1014,9 @@ constexpr auto operator""_c() noexcept {
 using detail::runtime_constant;
 using detail::static_constant;
 using detail::variable;
+
+using detail::e;
+using detail::pi;
 
 using detail::acos;
 using detail::acosh;

@@ -11,7 +11,7 @@ struct ad::format_variable<0> {
 int main() {
   using namespace ad::literals;
   const auto x = ad::_0;
-  const auto f = (-ad::sin(2 * x) + 1_c) * -(ad::pow(x, 2_c) - 1_c);
+  const auto f = (-ad::sin(2 * ad::pi * x) + 1_c) * -(ad::pow(x, 2_c) - 1_c);
   std::cout << "f (" << x << ") = " << f << '\n';
   std::cout << "f'(" << x << ") = " << f.derive() << '\n';
 }
