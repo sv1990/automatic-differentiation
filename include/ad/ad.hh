@@ -59,8 +59,8 @@ inline constexpr bool is_constant_v = false;
 template <typename T>
 inline constexpr bool is_variable_v = false;
 
-template <std::size_t N>
-inline constexpr bool is_variable_v<variable<N>> = true;
+template <typename T>
+inline constexpr bool is_static_v = false;
 
 template <typename T>
 struct is_variable : std::bool_constant<is_variable_v<T>> {};
@@ -166,11 +166,11 @@ struct static_constant : expression<static_constant<N>> {
 template <long N>
 inline constexpr bool is_constant_v<static_constant<N>> = true;
 
-template <typename T>
-inline constexpr bool is_static_constant_v = false;
-
 template <long N>
-inline constexpr bool is_static_constant_v<static_constant<N>> = true;
+inline constexpr bool is_static_v<static_constant<N>> = true;
+
+template <typename T>
+inline constexpr bool is_static_constant_v = is_constant_v<T>&& is_static_v<T>;
 
 using zero  = static_constant<0>;
 using unity = static_constant<1>;
@@ -243,6 +243,28 @@ struct variable : expression<variable<N>> {
   }
   inline static constexpr std::size_t value = N;
 };
+
+template <std::size_t N>
+inline constexpr bool is_variable_v<variable<N>> = true;
+
+template <std::size_t N>
+inline constexpr bool is_static_v<variable<N>> = true;
+
+template <template <typename> typename E, typename T>
+inline constexpr bool is_static_v<E<T>> = is_static_v<T>;
+
+template <typename T>
+struct is_static : std::bool_constant<is_static_v<T>> {};
+
+template <template <typename, typename> typename E, typename L, typename R>
+inline constexpr bool is_static_v<E<L, R>> =
+    std::conjunction_v<is_static<L>, is_static<R>>;
+
+// Returns true if both expressions are guaranteed at compile time to be the
+// same
+template <typename L, typename R>
+inline constexpr bool is_static_same_v =
+    std::conjunction_v<std::is_same<L, R>, is_static<L>, is_static<R>>;
 
 template <typename T>
 constexpr auto exp(T x) noexcept {
@@ -680,7 +702,12 @@ struct addition : expression<addition<L, R>> {
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
 constexpr auto operator-(L l, R r) noexcept {
-  return subtraction(as_expression(l), as_expression(r));
+  if constexpr (is_static_same_v<L, R>) {
+    return zero{};
+  }
+  else {
+    return subtraction(as_expression(l), as_expression(r));
+  }
 }
 
 template <typename L, typename R,
@@ -802,7 +829,12 @@ constexpr auto operator*(division<unity, L> l, R r) noexcept {
 template <typename L, typename R,
           std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
 constexpr auto operator/(L l, R r) noexcept {
-  return division(as_expression(l), as_expression(r));
+  if constexpr (is_static_same_v<L, R>) {
+    return unity{};
+  }
+  else {
+    return division(as_expression(l), as_expression(r));
+  }
 }
 
 // TODO: Overload for static_constant?
