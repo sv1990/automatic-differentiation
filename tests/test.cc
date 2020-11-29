@@ -10,6 +10,11 @@ constexpr bool same_type(T, U) noexcept {
   return std::is_same_v<T, U>;
 }
 
+template <typename T>
+constexpr bool is_static_expression(T) {
+  return ad::detail::is_static_v<T>;
+}
+
 int main() {
   using namespace ad::literals;
   constexpr auto x = ad::_0;
@@ -59,4 +64,11 @@ int main() {
   assert(ad::to_string(-ad::exp(x)) == "-exp(x0)");
   assert(ad::to_string(-(x + 2)) == "-(x0 + 2)");
   assert(ad::to_string(-(x - 2)) == "-(x0 - 2)");
+
+  static_assert(is_static_expression(x));
+  static_assert(is_static_expression(x + 1_c));
+  static_assert(!is_static_expression(x + 1));
+
+  static_assert(same_type(ad::sin(x) - ad::sin(x), 0_c));
+  static_assert(same_type(ad::sin(x) / ad::sin(x), 1_c));
 }
