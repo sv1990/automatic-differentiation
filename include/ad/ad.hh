@@ -242,7 +242,7 @@ template <std::size_t N>
 inline constexpr bool is_variable_v<variable<N>> = true;
 
 // Returns true if both expressions are guaranteed at compile time to be the
-// same. A type can only have a runtime value if it as a nonstatic data member.
+// same. A type can only have a runtime value if it is non-empty.
 template <typename L, typename R>
 inline constexpr bool is_static_same_v =
     std::conjunction_v<std::is_empty<L>, std::is_empty<R>, std::is_same<L, R>>;
