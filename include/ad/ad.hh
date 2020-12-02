@@ -60,9 +60,6 @@ template <typename T>
 inline constexpr bool is_variable_v = false;
 
 template <typename T>
-inline constexpr bool is_static_v = false;
-
-template <typename T>
 struct is_variable : std::bool_constant<is_variable_v<T>> {};
 
 template <typename ConcreteExpression>
@@ -166,11 +163,8 @@ struct static_constant : expression<static_constant<N>> {
 template <long N>
 inline constexpr bool is_constant_v<static_constant<N>> = true;
 
-template <long N>
-inline constexpr bool is_static_v<static_constant<N>> = true;
-
 template <typename T>
-inline constexpr bool is_static_constant_v = is_constant_v<T>&& is_static_v<T>;
+inline constexpr bool is_static_constant_v = is_constant_v<T>&& std::is_empty_v<T>;
 
 using zero  = static_constant<0>;
 using unity = static_constant<1>;
@@ -247,24 +241,11 @@ struct variable : expression<variable<N>> {
 template <std::size_t N>
 inline constexpr bool is_variable_v<variable<N>> = true;
 
-template <std::size_t N>
-inline constexpr bool is_static_v<variable<N>> = true;
-
-template <template <typename> typename E, typename T>
-inline constexpr bool is_static_v<E<T>> = is_static_v<T>;
-
-template <typename T>
-struct is_static : std::bool_constant<is_static_v<T>> {};
-
-template <template <typename, typename> typename E, typename L, typename R>
-inline constexpr bool is_static_v<E<L, R>> =
-    std::conjunction_v<is_static<L>, is_static<R>>;
-
 // Returns true if both expressions are guaranteed at compile time to be the
-// same
+// same. A type can only have a runtime value if it as a nonstatic data member.
 template <typename L, typename R>
 inline constexpr bool is_static_same_v =
-    std::conjunction_v<std::is_same<L, R>, is_static<L>, is_static<R>>;
+    std::conjunction_v<std::is_empty<L>, std::is_empty<R>, std::is_same<L, R>>;
 
 template <typename T>
 constexpr auto exp(T x) noexcept {
