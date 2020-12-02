@@ -164,7 +164,8 @@ template <long N>
 inline constexpr bool is_constant_v<static_constant<N>> = true;
 
 template <typename T>
-inline constexpr bool is_static_constant_v = is_constant_v<T>&& std::is_empty_v<T>;
+inline constexpr bool is_static_constant_v =
+    is_constant_v<T>&& std::is_empty_v<T>;
 
 using zero  = static_constant<0>;
 using unity = static_constant<1>;
@@ -1035,7 +1036,7 @@ using detail::sqrt;
 using detail::tan;
 using detail::tanh;
 
-inline namespace vars {
+inline namespace variables {
 inline constexpr variable<0> _0;
 inline constexpr variable<1> _1;
 inline constexpr variable<2> _2;
@@ -1046,7 +1047,7 @@ inline constexpr variable<6> _6;
 inline constexpr variable<7> _7;
 inline constexpr variable<8> _8;
 inline constexpr variable<9> _9;
-} // namespace vars
+} // namespace variables
 
 } // namespace ad
 
