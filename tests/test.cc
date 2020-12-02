@@ -12,7 +12,7 @@ constexpr bool same_type(T, U) noexcept {
 
 template <typename T>
 constexpr bool is_static_expression(T) {
-  return std::is_empty_v<T>;
+  return ad::detail::is_static_v<T>;
 }
 
 int main() {
