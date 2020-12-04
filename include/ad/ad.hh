@@ -5,6 +5,12 @@
 
 #include <cmath>
 
+#if __has_cpp_attribute(no_unique_address)
+#  define AD_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#else
+#  define AD_NO_UNIQUE_ADDRESS
+#endif
+
 namespace ad {
 namespace detail {
 template <std::size_t N>
@@ -280,7 +286,7 @@ template <typename T>
 struct exponential : unary_function<exponential<T>> {
   using unary_function<exponential>::derive;
   friend struct unary_function<exponential<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit exponential(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -301,7 +307,7 @@ template <typename T>
 struct square_root : unary_function<square_root<T>> {
   using unary_function<square_root>::derive;
   friend struct unary_function<square_root<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit square_root(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -329,7 +335,7 @@ template <typename T>
 struct logarithm : unary_function<logarithm<T>> {
   using unary_function<logarithm>::derive;
   friend struct unary_function<logarithm<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit logarithm(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -354,7 +360,7 @@ template <typename T>
 struct sinus : unary_function<sinus<T>> {
   using unary_function<sinus>::derive;
   friend struct unary_function<sinus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit sinus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -380,7 +386,7 @@ template <typename T>
 struct cosinus : unary_function<cosinus<T>> {
   using unary_function<cosinus>::derive;
   friend struct unary_function<cosinus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit cosinus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -405,7 +411,7 @@ template <typename T>
 struct tangens : unary_function<tangens<T>> {
   using unary_function<tangens>::derive;
   friend struct unary_function<tangens<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit tangens(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -431,7 +437,7 @@ template <typename T>
 struct sinus_hyperbolicus : unary_function<sinus_hyperbolicus<T>> {
   using unary_function<sinus_hyperbolicus>::derive;
   friend struct unary_function<sinus_hyperbolicus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit sinus_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -455,7 +461,7 @@ template <typename T>
 struct cosinus_hyperbolicus : unary_function<cosinus_hyperbolicus<T>> {
   using unary_function<cosinus_hyperbolicus>::derive;
   friend struct unary_function<cosinus_hyperbolicus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit cosinus_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -480,7 +486,7 @@ template <typename T>
 struct tangens_hyperbolicus : unary_function<tangens_hyperbolicus<T>> {
   using unary_function<tangens_hyperbolicus>::derive;
   friend struct unary_function<tangens_hyperbolicus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit tangens_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -506,7 +512,7 @@ template <typename T>
 struct arcus_sinus : unary_function<arcus_sinus<T>> {
   using unary_function<arcus_sinus>::derive;
   friend struct unary_function<arcus_sinus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit arcus_sinus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -532,7 +538,7 @@ template <typename T>
 struct arcus_cosinus : unary_function<arcus_cosinus<T>> {
   using unary_function<arcus_cosinus>::derive;
   friend struct unary_function<arcus_cosinus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit arcus_cosinus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -558,7 +564,7 @@ template <typename T>
 struct arcus_tangens : unary_function<arcus_tangens<T>> {
   using unary_function<arcus_tangens>::derive;
   friend struct unary_function<arcus_tangens<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit arcus_tangens(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -584,7 +590,7 @@ template <typename T>
 struct area_sinus_hyperbolicus : unary_function<area_sinus_hyperbolicus<T>> {
   using unary_function<area_sinus_hyperbolicus>::derive;
   friend struct unary_function<area_sinus_hyperbolicus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit area_sinus_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -612,7 +618,7 @@ struct area_cosinus_hyperbolicus
     : unary_function<area_cosinus_hyperbolicus<T>> {
   using unary_function<area_cosinus_hyperbolicus>::derive;
   friend struct unary_function<area_cosinus_hyperbolicus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit area_cosinus_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -641,7 +647,7 @@ struct area_tangens_hyperbolicus
     : unary_function<area_tangens_hyperbolicus<T>> {
   using unary_function<area_tangens_hyperbolicus>::derive;
   friend struct unary_function<area_tangens_hyperbolicus<T>>;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit area_tangens_hyperbolicus(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -685,8 +691,8 @@ constexpr auto operator+(T x, zero) noexcept {
 template <typename L, typename R>
 struct addition : expression<addition<L, R>> {
   using expression<addition>::derive;
-  [[no_unique_address]] L lhs;
-  [[no_unique_address]] R rhs;
+  AD_NO_UNIQUE_ADDRESS L lhs;
+  AD_NO_UNIQUE_ADDRESS R rhs;
   constexpr explicit addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -734,8 +740,8 @@ constexpr auto operator-(zero, T x) noexcept {
 template <typename L, typename R>
 struct subtraction : expression<subtraction<L, R>> {
   using expression<subtraction>::derive;
-  [[no_unique_address]] L lhs;
-  [[no_unique_address]] R rhs;
+  AD_NO_UNIQUE_ADDRESS L lhs;
+  AD_NO_UNIQUE_ADDRESS R rhs;
   constexpr explicit subtraction(L lhs_, R rhs_) noexcept
       : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
@@ -752,8 +758,8 @@ struct subtraction : expression<subtraction<L, R>> {
 template <typename L, typename R>
 struct multiplication : expression<multiplication<L, R>> {
   using expression<multiplication>::derive;
-  [[no_unique_address]] L lhs;
-  [[no_unique_address]] R rhs;
+  AD_NO_UNIQUE_ADDRESS L lhs;
+  AD_NO_UNIQUE_ADDRESS R rhs;
   constexpr explicit multiplication(L lhs_, R rhs_) noexcept
       : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
@@ -877,8 +883,8 @@ constexpr auto operator/(exponential<L> l, exponential<R> r) noexcept {
 template <typename L, typename R>
 struct division : expression<division<L, R>> {
   using expression<division>::derive;
-  [[no_unique_address]] L lhs;
-  [[no_unique_address]] R rhs;
+  AD_NO_UNIQUE_ADDRESS L lhs;
+  AD_NO_UNIQUE_ADDRESS R rhs;
   constexpr explicit division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -944,8 +950,8 @@ constexpr auto pow(power<L, R> lhs, T rhs) noexcept {
 template <typename L, typename R>
 struct power : expression<power<L, R>> {
   using expression<power>::derive;
-  [[no_unique_address]] L lhs;
-  [[no_unique_address]] R rhs;
+  AD_NO_UNIQUE_ADDRESS L lhs;
+  AD_NO_UNIQUE_ADDRESS R rhs;
   constexpr explicit power(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
@@ -998,7 +1004,7 @@ constexpr auto operator-(division<L, R> x) noexcept {
 template <typename T>
 struct negation : expression<negation<T>> {
   using expression<negation>::derive;
-  [[no_unique_address]] T arg;
+  AD_NO_UNIQUE_ADDRESS T arg;
   constexpr explicit negation(T x) noexcept : arg(x) {}
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
