@@ -707,7 +707,7 @@ struct addition : expression<addition<L, R>> {
 
 template <typename L, typename R,
           std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
-constexpr auto operator-(L l, R r) noexcept {
+constexpr auto operator-([[maybe_unused]] L l, [[maybe_unused]] R r) noexcept {
   if constexpr (is_static_same_v<L, R>) {
     return zero{};
   }
@@ -834,7 +834,7 @@ constexpr auto operator*(division<unity, L> l, R r) noexcept {
 
 template <typename L, typename R,
           std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
-constexpr auto operator/(L l, R r) noexcept {
+constexpr auto operator/([[maybe_unused]] L l, [[maybe_unused]] R r) noexcept {
   if constexpr (is_static_same_v<L, R>) {
     return unity{};
   }
