@@ -218,15 +218,15 @@ constexpr auto as_expression(T x) noexcept {
 }
 
 template <std::size_t I, typename... Ts>
-constexpr double get(Ts... xs) noexcept {
+constexpr double get_argument(Ts... xs) noexcept {
   if constexpr (I >= sizeof...(Ts)) {
     static_assert(dependent_false<Ts...>,
                   "Too few arguments passed! Maybe you meant to use ad::_0 "
                   "instead of ad::_1.");
   }
   else {
-    double arr[] = {static_cast<double>(xs)...};
-    return arr[I];
+    double arguments[] = {static_cast<double>(xs)...};
+    return arguments[I];
   }
 }
 
@@ -236,7 +236,7 @@ struct variable : expression<variable<N>> {
   template <typename... Ts, std::enable_if_t<std::conjunction_v<
                                 std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
-    return get<N>(xs...);
+    return get_argument<N>(xs...);
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
