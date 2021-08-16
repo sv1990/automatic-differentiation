@@ -701,7 +701,7 @@ struct addition : expression<addition<L, R>> {
   }
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
-    return operator+(lhs.template derive<I>(), rhs.template derive<I>());
+    return lhs.template derive<I>() + rhs.template derive<I>();
   }
 };
 
