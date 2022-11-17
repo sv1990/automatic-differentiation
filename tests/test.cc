@@ -54,6 +54,8 @@ int main() {
   static_assert(same_type(ad::pow(ad::exp(x), 2_c), ad::exp(x * 2_c)));
   static_assert(same_type(ad::pow(ad::pow(x, 2_c), 2_c), ad::pow(x, 4_c)));
 
+  static_assert(same_type(ad::pow(x, 0_c), 1_c));
+
 #if __has_attribute(no_unique_address)
   static_assert(sizeof(ad::exp(x)) == 1);
   static_assert(sizeof(x + 1_c) == 1);

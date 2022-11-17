@@ -184,7 +184,7 @@ template <long N>
 inline constexpr bool is_static_v<static_constant<N>> = true;
 
 template <typename T>
-inline constexpr bool is_static_constant_v = is_constant_v<T>&& is_static_v<T>;
+inline constexpr bool is_static_constant_v = is_constant_v<T> && is_static_v<T>;
 
 using zero  = static_constant<0>;
 using unity = static_constant<1>;
@@ -1058,7 +1058,7 @@ constexpr auto pow(unity, T) noexcept {
 
 template <typename T>
 constexpr auto pow(T, zero) noexcept {
-  return zero{};
+  return unity{};
 }
 
 template <typename T>
