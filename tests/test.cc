@@ -38,10 +38,13 @@ int main() {
   static_assert(same_type(ad::sin(x).derive(x, x, x), -ad::cos(x)));
   static_assert(same_type(ad::sin(x).derive(x, x, x, x), ad::sin(x)));
 
-  static_assert(same_type(ad::exp(ad::sin(x)).derive(x),
-                          ad::cos(x) * ad::exp(ad::sin(x))));
-  static_assert(same_type((ad::exp(x) * ad::sin(x)).derive(x),
-                          ad::exp(x) * ad::sin(x) + ad::exp(x) * ad::cos(x)));
+  static_assert(
+      same_type(ad::exp(ad::sin(x)).derive(x), ad::cos(x) * ad::exp(ad::sin(x)))
+  );
+  static_assert(same_type(
+      (ad::exp(x) * ad::sin(x)).derive(x),
+      ad::exp(x) * ad::sin(x) + ad::exp(x) * ad::cos(x)
+  ));
 
   static_assert(same_type(-(-x * 1_c), x));
   static_assert(same_type(-0_c, 0_c));

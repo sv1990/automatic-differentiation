@@ -12,8 +12,9 @@ int main() {
   const auto d2f = df.derive();
 
   static_assert(sizeof(f) < sizeof((x + 1) * (x - 1)));
-  static_assert(
-      std::is_same_v<std::decay_t<decltype(d2f)>, std::decay_t<decltype(2_c)>>);
+  static_assert(std::is_same_v<
+                std::decay_t<decltype(d2f)>,
+                std::decay_t<decltype(2_c)>>);
 
   int colwidth = 7;
   std::cout << std::setw(colwidth) << std::right << "x" << ' '     //

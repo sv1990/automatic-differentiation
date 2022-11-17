@@ -28,11 +28,13 @@ struct is_operator {
   bool operator()(const T&) const noexcept {
     return false;
   }
+
   template <typename L, typename R>
   bool operator()(const Op<L, R>&) const noexcept {
     return true;
   }
 };
+
 is_operator<addition> is_addition;
 is_operator<multiplication> is_multiplication;
 
@@ -59,6 +61,7 @@ struct print_impl {
   static void print(std::ostream& os, const T& x) {
     os << x.value();
   }
+
   template <std::size_t N>
   static void print(std::ostream& os, const variable<N>&) {
     os << format_variable<N>::rep;
@@ -66,15 +69,16 @@ struct print_impl {
 
 private:
   template <typename T>
-  static void print_function(std::ostream& os, std::string_view op,
-                             const T& x) {
+  static void
+  print_function(std::ostream& os, std::string_view op, const T& x) {
     os << op << '(';
     print(os, x.arg);
     os << ')';
   }
+
   template <typename T>
-  static void print_with_brackets(std::ostream& os, bool needs_brackets,
-                                  const T& x) {
+  static void
+  print_with_brackets(std::ostream& os, bool needs_brackets, const T& x) {
     if (needs_brackets) {
       os << '(';
     }
@@ -85,8 +89,8 @@ private:
   }
 
   template <typename T>
-  static void print_binary_operator(std::ostream& os, std::string_view op,
-                                    const T& x) {
+  static void
+  print_binary_operator(std::ostream& os, std::string_view op, const T& x) {
     const auto& lhs = x.lhs;
     const auto& rhs = x.rhs;
 
@@ -94,8 +98,10 @@ private:
     const bool rhs_needs_brackets =
         precedence(x) > precedence(rhs)
         || (precedence(x) == precedence(rhs)
-            && !((is_addition(x) && is_addition(rhs))
-                 || (is_multiplication(x) && is_multiplication(rhs))));
+            && !(
+                (is_addition(x) && is_addition(rhs))
+                || (is_multiplication(x) && is_multiplication(rhs))
+            ));
 
     print_with_brackets(os, lhs_needs_brackets, lhs);
     os << ' ' << op << ' ';
@@ -106,22 +112,27 @@ private:
   static constexpr int precedence(const addition<L, R>&) {
     return 1;
   }
+
   template <typename L, typename R>
   static constexpr int precedence(const subtraction<L, R>&) {
     return 1;
   }
+
   template <typename L, typename R>
   static constexpr int precedence(const multiplication<L, R>&) {
     return 2;
   }
+
   template <typename L, typename R>
   static constexpr int precedence(const division<L, R>&) {
     return 2;
   }
+
   template <typename L, typename R>
   static constexpr int precedence(const power<L, R>&) {
     return 3;
   }
+
   static constexpr int precedence(...) { return 4; }
 
 public:
@@ -129,18 +140,22 @@ public:
   static void print(std::ostream& os, const addition<L, R>& x) {
     print_binary_operator(os, "+", x);
   }
+
   template <typename L, typename R>
   static void print(std::ostream& os, const subtraction<L, R>& x) {
     print_binary_operator(os, "-", x);
   }
+
   template <typename L, typename R>
   static void print(std::ostream& os, const multiplication<L, R>& x) {
     print_binary_operator(os, "*", x);
   }
+
   template <typename L, typename R>
   static void print(std::ostream& os, const division<L, R>& x) {
     print_binary_operator(os, "/", x);
   }
+
   template <typename L, typename R>
   static void print(std::ostream& os, const power<L, R>& x) {
     print_binary_operator(os, "**", x);
@@ -150,58 +165,72 @@ public:
   static void print(std::ostream& os, const sinus<T>& x) {
     print_function(os, "sin", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const cosinus<T>& x) {
     print_function(os, "cos", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const tangens<T>& x) {
     print_function(os, "tan", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const arcus_sinus<T>& x) {
     print_function(os, "asin", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const arcus_cosinus<T>& x) {
     print_function(os, "acos", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const arcus_tangens<T>& x) {
     print_function(os, "atan", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const sinus_hyperbolicus<T>& x) {
     print_function(os, "sinh", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const cosinus_hyperbolicus<T>& x) {
     print_function(os, "cosh", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const tangens_hyperbolicus<T>& x) {
     print_function(os, "sin", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const area_sinus_hyperbolicus<T>& x) {
     print_function(os, "asinh", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const area_cosinus_hyperbolicus<T>& x) {
     print_function(os, "acosh", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const area_tangens_hyperbolicus<T>& x) {
     print_function(os, "atanh", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const exponential<T>& x) {
     print_function(os, "exp", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const logarithm<T>& x) {
     print_function(os, "log", x);
   }
+
   template <typename T>
   static void print(std::ostream& os, const square_root<T>& x) {
     print_function(os, "sqrt", x);

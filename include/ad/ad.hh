@@ -73,8 +73,9 @@ struct is_variable : std::bool_constant<is_variable_v<T>> {};
 
 template <typename ConcreteExpression>
 struct expression {
-  template <typename... Ts,
-            std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
+  template <
+      typename... Ts,
+      std::enable_if_t<std::conjunction_v<is_variable<Ts>...>>* = nullptr>
   constexpr auto derive(Ts...) const noexcept {
     return derive<Ts::value...>();
   }
@@ -136,6 +137,7 @@ private:
 template <typename ConcreteFunction>
 struct unary_function : expression<unary_function<ConcreteFunction>> {
   using expression<unary_function>::derive;
+
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     const auto& function = static_cast<const ConcreteFunction&>(*this);
@@ -149,20 +151,26 @@ private:
 
 // clang-format off
 template <typename T>
-inline constexpr bool is_expression_v = std::is_base_of_v<expression<T>, T> 
+inline constexpr bool is_expression_v = std::is_base_of_v<expression<T>, T>
                                         || std::is_base_of_v<unary_function<T>, T>;
+
 // clang-format on
 
 template <long N>
 struct static_constant : expression<static_constant<N>> {
   using expression<static_constant>::derive;
   constexpr static_constant() = default;
+
   constexpr double value() const noexcept { return static_cast<double>(N); }
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts...) const noexcept {
     return value();
   }
+
   template <std::size_t = 0>
   constexpr auto derive() const noexcept {
     return static_constant<0>{};
@@ -184,13 +192,19 @@ using unity = static_constant<1>;
 struct runtime_constant : expression<runtime_constant> {
   using expression<runtime_constant>::derive;
   double _value;
+
   constexpr explicit runtime_constant(double value) noexcept : _value(value) {}
+
   constexpr double value() const noexcept { return _value; }
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts...) const noexcept {
     return _value;
   }
+
   template <std::size_t = 0>
   constexpr auto derive() const noexcept {
     return zero{};
@@ -212,17 +226,20 @@ constexpr auto as_expression(T x) noexcept {
     return runtime_constant{static_cast<double>(x)};
   }
   else {
-    static_assert(dependent_false<T>,
-                  "Wrong type passed! ad expects arithmetic types!");
+    static_assert(
+        dependent_false<T>, "Wrong type passed! ad expects arithmetic types!"
+    );
   }
 }
 
 template <std::size_t I, typename... Ts>
 constexpr double get_argument(Ts... xs) noexcept {
   if constexpr (I >= sizeof...(Ts)) {
-    static_assert(dependent_false<Ts...>,
-                  "Too few arguments passed! Maybe you meant to use ad::_0 "
-                  "instead of ad::_1.");
+    static_assert(
+        dependent_false<Ts...>,
+        "Too few arguments passed! Maybe you meant to use ad::_0 "
+        "instead of ad::_1."
+    );
   }
   else {
     double arguments[] = {static_cast<double>(xs)...};
@@ -233,11 +250,15 @@ constexpr double get_argument(Ts... xs) noexcept {
 template <std::size_t N>
 struct variable : expression<variable<N>> {
   using expression<variable>::derive;
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return get_argument<N>(xs...);
   }
+
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     if constexpr (I == N) {
@@ -247,6 +268,7 @@ struct variable : expression<variable<N>> {
       return zero{};
     }
   }
+
   inline static constexpr std::size_t value = N;
 };
 
@@ -287,9 +309,13 @@ struct exponential : unary_function<exponential<T>> {
   using unary_function<exponential>::derive;
   friend struct unary_function<exponential<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit exponential(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::exp(arg(xs...));
   }
@@ -308,9 +334,13 @@ struct square_root : unary_function<square_root<T>> {
   using unary_function<square_root>::derive;
   friend struct unary_function<square_root<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit square_root(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::sqrt(arg(xs...));
   }
@@ -336,9 +366,13 @@ struct logarithm : unary_function<logarithm<T>> {
   using unary_function<logarithm>::derive;
   friend struct unary_function<logarithm<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit logarithm(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::log(arg(xs...));
   }
@@ -351,6 +385,7 @@ template <typename T>
 constexpr auto sin(T x) noexcept {
   return sinus(as_expression(x));
 }
+
 template <typename T>
 constexpr auto sin(arcus_sinus<T> x) noexcept {
   return x.arg;
@@ -361,9 +396,13 @@ struct sinus : unary_function<sinus<T>> {
   using unary_function<sinus>::derive;
   friend struct unary_function<sinus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit sinus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::sin(arg(xs...));
   }
@@ -387,9 +426,13 @@ struct cosinus : unary_function<cosinus<T>> {
   using unary_function<cosinus>::derive;
   friend struct unary_function<cosinus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit cosinus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::cos(arg(xs...));
   }
@@ -402,6 +445,7 @@ template <typename T>
 constexpr auto tan(T x) noexcept {
   return tangens(as_expression(x));
 }
+
 template <typename T>
 constexpr auto tan(arcus_tangens<T> x) noexcept {
   return x.arg;
@@ -412,9 +456,13 @@ struct tangens : unary_function<tangens<T>> {
   using unary_function<tangens>::derive;
   friend struct unary_function<tangens<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit tangens(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::tan(arg(xs...));
   }
@@ -429,18 +477,24 @@ template <typename T>
 constexpr auto sinh(T x) noexcept {
   return sinus_hyperbolicus(as_expression(x));
 }
+
 template <typename T>
 constexpr auto sinh(area_sinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
+
 template <typename T>
 struct sinus_hyperbolicus : unary_function<sinus_hyperbolicus<T>> {
   using unary_function<sinus_hyperbolicus>::derive;
   friend struct unary_function<sinus_hyperbolicus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit sinus_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::sinh(arg(xs...));
   }
@@ -453,18 +507,24 @@ template <typename T>
 constexpr auto cosh(T x) noexcept {
   return cosinus_hyperbolicus(as_expression(x));
 }
+
 template <typename T>
 constexpr auto cosh(area_cosinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
+
 template <typename T>
 struct cosinus_hyperbolicus : unary_function<cosinus_hyperbolicus<T>> {
   using unary_function<cosinus_hyperbolicus>::derive;
   friend struct unary_function<cosinus_hyperbolicus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit cosinus_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::cosh(arg(xs...));
   }
@@ -477,6 +537,7 @@ template <typename T>
 constexpr auto tanh(T x) noexcept {
   return tangens_hyperbolicus(as_expression(x));
 }
+
 template <typename T>
 constexpr auto tanh(area_tangens_hyperbolicus<T> x) noexcept {
   return x.arg;
@@ -487,9 +548,13 @@ struct tangens_hyperbolicus : unary_function<tangens_hyperbolicus<T>> {
   using unary_function<tangens_hyperbolicus>::derive;
   friend struct unary_function<tangens_hyperbolicus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit tangens_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::tanh(arg(xs...));
   }
@@ -504,18 +569,24 @@ template <typename T>
 constexpr auto asin(T x) noexcept {
   return arcus_sinus(as_expression(x));
 }
+
 template <typename T>
 constexpr auto asin(sinus<T> x) noexcept {
   return x.arg;
 }
+
 template <typename T>
 struct arcus_sinus : unary_function<arcus_sinus<T>> {
   using unary_function<arcus_sinus>::derive;
   friend struct unary_function<arcus_sinus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit arcus_sinus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::asin(arg(xs...));
   }
@@ -530,18 +601,24 @@ template <typename T>
 constexpr auto acos(T x) noexcept {
   return arcus_cosinus(as_expression(x));
 }
+
 template <typename T>
 constexpr auto acos(cosinus<T> x) noexcept {
   return x.arg;
 }
+
 template <typename T>
 struct arcus_cosinus : unary_function<arcus_cosinus<T>> {
   using unary_function<arcus_cosinus>::derive;
   friend struct unary_function<arcus_cosinus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit arcus_cosinus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::acos(arg(xs...));
   }
@@ -556,18 +633,24 @@ template <typename T>
 constexpr auto atan(T x) noexcept {
   return arcus_tangens(as_expression(x));
 }
+
 template <typename T>
 constexpr auto atan(tangens<T> x) noexcept {
   return x.arg;
 }
+
 template <typename T>
 struct arcus_tangens : unary_function<arcus_tangens<T>> {
   using unary_function<arcus_tangens>::derive;
   friend struct unary_function<arcus_tangens<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit arcus_tangens(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::atan(arg(xs...));
   }
@@ -582,18 +665,24 @@ template <typename T>
 constexpr auto asinh(T x) noexcept {
   return area_sinus_hyperbolicus(as_expression(x));
 }
+
 template <typename T>
 constexpr auto asinh(sinus_hyperbolicus<T> x) noexcept {
   return x.arg;
 }
+
 template <typename T>
 struct area_sinus_hyperbolicus : unary_function<area_sinus_hyperbolicus<T>> {
   using unary_function<area_sinus_hyperbolicus>::derive;
   friend struct unary_function<area_sinus_hyperbolicus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit area_sinus_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::asinh(arg(xs...));
   }
@@ -608,6 +697,7 @@ template <typename T>
 constexpr auto acosh(T x) noexcept {
   return area_cosinus_hyperbolicus(as_expression(x));
 }
+
 template <typename T>
 constexpr auto acosh(cosinus_hyperbolicus<T> x) noexcept {
   return x.arg;
@@ -619,9 +709,13 @@ struct area_cosinus_hyperbolicus
   using unary_function<area_cosinus_hyperbolicus>::derive;
   friend struct unary_function<area_cosinus_hyperbolicus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit area_cosinus_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::acosh(arg(xs...));
   }
@@ -648,9 +742,13 @@ struct area_tangens_hyperbolicus
   using unary_function<area_tangens_hyperbolicus>::derive;
   friend struct unary_function<area_tangens_hyperbolicus<T>>;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit area_tangens_hyperbolicus(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::atanh(arg(xs...));
   }
@@ -661,14 +759,18 @@ private:
   }
 };
 
-template <typename L, typename R,
-          std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
 constexpr auto operator+(L l, R r) noexcept {
   return addition(as_expression(l), as_expression(r));
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr auto operator+(L l, R r) noexcept {
   return runtime_constant{l.value() + r.value()};
 }
@@ -693,20 +795,27 @@ struct addition : expression<addition<L, R>> {
   using expression<addition>::derive;
   AD_NO_UNIQUE_ADDRESS L lhs;
   AD_NO_UNIQUE_ADDRESS R rhs;
+
   constexpr explicit addition(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) + rhs(xs...);
   }
+
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     return lhs.template derive<I>() + rhs.template derive<I>();
   }
 };
 
-template <typename L, typename R,
-          std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<!(is_constant_v<L> && is_constant_v<R>)>* = nullptr>
 constexpr auto operator-([[maybe_unused]] L l, [[maybe_unused]] R r) noexcept {
   if constexpr (is_static_same_v<L, R>) {
     return zero{};
@@ -716,8 +825,10 @@ constexpr auto operator-([[maybe_unused]] L l, [[maybe_unused]] R r) noexcept {
   }
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr auto operator-(L l, R r) noexcept {
   return runtime_constant{l.value() - r.value()};
 }
@@ -742,13 +853,18 @@ struct subtraction : expression<subtraction<L, R>> {
   using expression<subtraction>::derive;
   AD_NO_UNIQUE_ADDRESS L lhs;
   AD_NO_UNIQUE_ADDRESS R rhs;
+
   constexpr explicit subtraction(L lhs_, R rhs_) noexcept
       : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) - rhs(xs...);
   }
+
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     return lhs.template derive<I>() - rhs.template derive<I>();
@@ -760,27 +876,36 @@ struct multiplication : expression<multiplication<L, R>> {
   using expression<multiplication>::derive;
   AD_NO_UNIQUE_ADDRESS L lhs;
   AD_NO_UNIQUE_ADDRESS R rhs;
+
   constexpr explicit multiplication(L lhs_, R rhs_) noexcept
       : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) * rhs(xs...);
   }
+
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     return lhs.template derive<I>() * rhs + lhs * rhs.template derive<I>();
   }
 };
 
-template <typename L, typename R,
-          std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
   return multiplication(as_expression(l), as_expression(r));
 }
 
-template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr auto operator*(L l, R r) noexcept {
   return runtime_constant{l.value() * r.value()};
 }
@@ -820,20 +945,26 @@ constexpr auto operator*(exponential<L> l, exponential<R> r) noexcept {
   return exp(l.arg + r.arg);
 }
 
-template <typename L, typename R,
-          std::enable_if_t<!std::is_same_v<L, unity>>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<!std::is_same_v<L, unity>>* = nullptr>
 constexpr auto operator*(L l, division<unity, R> r) noexcept {
   return l / r.rhs;
 }
 
-template <typename L, typename R,
-          std::enable_if_t<!std::is_same_v<R, unity>>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<!std::is_same_v<R, unity>>* = nullptr>
 constexpr auto operator*(division<unity, L> l, R r) noexcept {
   return r / l.rhs;
 }
 
-template <typename L, typename R,
-          std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<!is_constant_v<L> || !is_constant_v<R>>* = nullptr>
 constexpr auto operator/([[maybe_unused]] L l, [[maybe_unused]] R r) noexcept {
   if constexpr (is_static_same_v<L, R>) {
     return unity{};
@@ -844,8 +975,10 @@ constexpr auto operator/([[maybe_unused]] L l, [[maybe_unused]] R r) noexcept {
 }
 
 // TODO: Overload for static_constant?
-template <typename L, typename R,
-          std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
+template <
+    typename L,
+    typename R,
+    std::enable_if_t<is_constant_v<L> && is_constant_v<R>>* = nullptr>
 constexpr auto operator/(L l, R r) noexcept {
   return runtime_constant{l.value() / r.value()};
 }
@@ -885,12 +1018,17 @@ struct division : expression<division<L, R>> {
   using expression<division>::derive;
   AD_NO_UNIQUE_ADDRESS L lhs;
   AD_NO_UNIQUE_ADDRESS R rhs;
+
   constexpr explicit division(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return lhs(xs...) / rhs(xs...);
   }
+
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     if constexpr (is_constant_v<R>) {
@@ -952,12 +1090,17 @@ struct power : expression<power<L, R>> {
   using expression<power>::derive;
   AD_NO_UNIQUE_ADDRESS L lhs;
   AD_NO_UNIQUE_ADDRESS R rhs;
+
   constexpr explicit power(L lhs_, R rhs_) noexcept : lhs(lhs_), rhs(rhs_) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return std::pow(lhs(xs...), rhs(xs...));
   }
+
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     if constexpr (is_constant_v<R>) {
@@ -1005,12 +1148,17 @@ template <typename T>
 struct negation : expression<negation<T>> {
   using expression<negation>::derive;
   AD_NO_UNIQUE_ADDRESS T arg;
+
   constexpr explicit negation(T x) noexcept : arg(x) {}
-  template <typename... Ts, std::enable_if_t<std::conjunction_v<
-                                std::is_convertible<Ts, double>...>>* = nullptr>
+
+  template <
+      typename... Ts,
+      std::enable_if_t<
+          std::conjunction_v<std::is_convertible<Ts, double>...>>* = nullptr>
   constexpr double operator()(Ts... xs) const noexcept {
     return -arg(xs...);
   }
+
   template <std::size_t I = 0>
   constexpr auto derive() const noexcept {
     return -arg.template derive<I>();

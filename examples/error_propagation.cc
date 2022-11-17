@@ -1,8 +1,8 @@
 #include "ad/ad.hh"
 
+#include <array>
 #include <iostream>
 #include <numeric>
-#include <array>
 
 #include <cmath>
 
@@ -23,24 +23,32 @@ calculate_gradient_impl(E e, std::index_sequence<Is...>, Ts... xs) {
 
 template <typename E, typename... Ts>
 auto calculate_gradient(E e, Ts... xs) {
-  return calculate_gradient_impl(e, std::make_index_sequence<sizeof...(xs)>{},
-                                 xs...);
+  return calculate_gradient_impl(
+      e, std::make_index_sequence<sizeof...(xs)>{}, xs...
+  );
 }
 
-template <typename Func,
-          std::enable_if_t<ad::detail::is_expression_v<Func>>* = nullptr>
+template <
+    typename Func,
+    std::enable_if_t<ad::detail::is_expression_v<Func>>* = nullptr>
 auto std_dev(Func func) {
   return [func](auto... xs) {
     std::array gradient = calculate_gradient(func, xs.val...);
     std::array stddevs{xs.stddev...};
     return std::sqrt(std::inner_product(
-        begin(gradient), end(gradient), begin(stddevs), 0.0, std::plus{},
-        [](double l, double r) { return l * l * r * r; }));
+        begin(gradient),
+        end(gradient),
+        begin(stddevs),
+        0.0,
+        std::plus{},
+        [](double l, double r) { return l * l * r * r; }
+    ));
   };
 }
 
-template <typename Func,
-          std::enable_if_t<ad::detail::is_expression_v<Func>>* = nullptr>
+template <
+    typename Func,
+    std::enable_if_t<ad::detail::is_expression_v<Func>>* = nullptr>
 auto make_ufunction(Func func) {
   return [func, std = std_dev(func)](auto... xs) {
     return udouble{func(xs.val...), std(xs...)};
